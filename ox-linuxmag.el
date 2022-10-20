@@ -5,7 +5,7 @@
 ;; Authors: Damien Cassou <damien@cassou.me>
 ;; Version: 0.1.0
 ;; URL: https://github.com/DamienCassou/ox-linuxmag
-;; Package-Requires: ((emacs "28.2"))
+;; Package-Requires: ((emacs "28.1"))
 ;; Created: 15 Oct 2022
 
 ;; This file is not part of GNU Emacs.
@@ -89,6 +89,9 @@ original parsed data.  INFO is a plist holding export options."
   (ox-linuxmag--write-template-file contents info))
 
 (defun ox-linuxmag--write-meta-file (info)
+  "Create the contents of the meta.xml file.
+
+INFO is a plist holding contextual information."
   (let ((title (org-export-data (plist-get info :title) info))
 	(subtitle (org-export-data (plist-get info :subtitle) info))
 	(author (let ((author (plist-get info :author)))
@@ -138,6 +141,7 @@ original parsed data.  INFO is a plist holding export options."
     (org-odt-create-manifest-file-entry "text/xml" "meta.xml")))
 
 (defun ox-linuxmag--write-styles-file ()
+  "Create the contents of the styles.xml file."
   (let* ((styles-file (expand-file-name "styles.xml" ox-linuxmag--resources-dir)))
     (copy-file styles-file (concat org-odt-zip-dir "styles.xml") t)
     ;; create a manifest entry for styles.xml
@@ -146,6 +150,10 @@ original parsed data.  INFO is a plist holding export options."
     (set-file-modes (concat org-odt-zip-dir "styles.xml") #o600)))
 
 (defun ox-linuxmag--write-template-file (contents info)
+  "Create the contents of the template.xml file.
+
+CONTENTS is the exported text.  INFO is a plist holding
+contextual information."
   (let* (;; `org-display-custom-times' should be accessed right
 	 ;; within the context of the Org buffer.  So obtain its
 	 ;; value before moving on to temp-buffer context down below.
@@ -183,19 +191,24 @@ original parsed data.  INFO is a plist holding export options."
       (buffer-substring-no-properties (point-min) (point-max)))))
 
 (defun ox-linuxmag--write-preamble (info)
+  "Insert the first body lines of a template.xml file into the current buffer.
+
+INFO is a plist holding contextual information."
   (cl-labels ((get-property (keyword) (plist-get info keyword))
               (export-property (keyword) (org-export-data (get-property keyword) info)))
-    (insert (ox-linuxmag--format-text:h (export-property :title) "Heading"))
-    (insert (ox-linuxmag--format-text:p (export-property :author) "Signature"))
-    (insert (ox-linuxmag--format-text:p
+    (insert (ox-linuxmag--format-texth (export-property :title) "Heading"))
+    (insert (ox-linuxmag--format-textp (export-property :author) "Signature"))
+    (insert (ox-linuxmag--format-textp
              (format "[%s]" (export-property :author-description))
              "Signature"))
-    (insert (ox-linuxmag--format-text:p (export-property :description) "chapeau"))
+    (insert (ox-linuxmag--format-textp (export-property :description) "chapeau"))
     (insert (ox-linuxmag--format-pragma "Mots-clés"))
-    (insert (ox-linuxmag--format-text:p (export-property :keywords)))
+    (insert (ox-linuxmag--format-textp (export-property :keywords)))
     (insert (ox-linuxmag--format-pragma (format "Fin %s" "Mots-clés")))
     (dolist (logo (split-string (get-property :logos) ","))
       (insert (ox-linuxmag--format-pragma (format "Logo : %s" (string-trim logo)))))))
+
+(defvar nxml-auto-insert-xml-declaration-flag)
 
 ;;; Notes:
 ;;; - same as org-odt-export-to-odt but with 'ox-linuxmag as backend
@@ -255,10 +268,7 @@ Return output file's name."
        (let* ((org-odt-embedded-images-count 0)
 	      (org-odt-embedded-formulas-count 0)
 	      (org-odt-automatic-styles nil)
-	      (org-odt-object-counters nil)
-	      ;; Let `htmlfontify' know that we are interested in collecting
-	      ;; styles.
-	      (hfy-user-sheet-assoc nil))
+	      (org-odt-object-counters nil))
 	 ;; Initialize content.xml and kick-off the export process.
 	 (let ((output (org-export-as 'linuxmag subtreep visible-only nil ext-plist))
 	       (out-buf (progn
@@ -283,7 +293,7 @@ channel."
   "Transcode BOLD from Org to ODT.
 CONTENTS is the text with bold markup.  INFO is a plist holding
 contextual information."
-  (ox-linuxmag--format-text:span contents "gras"))
+  (ox-linuxmag--format-textspan contents "gras"))
 
 (defun ox-linuxmag--headline (headline contents info)
   "Transcode a HEADLINE element from Org to ODT.
@@ -300,12 +310,16 @@ holding contextual information."
          (full-text (org-odt-format-headline--wrap headline nil info format-headline-function))
 	 (level (org-export-get-relative-level headline info)))
     (concat
-     (ox-linuxmag--format-text:h full-text (format "Heading_20_%s" level))
+     (ox-linuxmag--format-texth full-text (format "Heading_20_%s" level))
      contents)))
 
 (cl-defun ox-linuxmag--format-headline-function (_todo _todo-type _priority text _tags
 		                                       &key section-number
 		                                       &allow-other-keys)
+  "Return a string to be used as content of a headline.
+
+TEXT is the section title and SECTION-NUMBER is a dot-separated
+string identifying the headline."
   (if (seq-contains-p section-number ?.)
       (format "%s %s" section-number text)
     (format "%s. %s" section-number text)))
@@ -314,9 +328,9 @@ holding contextual information."
   "Transcode ITALIC from Org to ODT.
 CONTENTS is the text with italic markup.  INFO is a plist holding
 contextual information."
-  (ox-linuxmag--format-text:span contents "italic"))
+  (ox-linuxmag--format-textspan contents "italic"))
 
-(defun ox-linuxmag--link (link desc info)
+(defun ox-linuxmag--link (link _desc _info)
   "Transcode a LINK object from Org to ODT.
 
 DESC is the description part of the link, or the empty string.
@@ -324,10 +338,10 @@ INFO is a plist holding contextual information.  See
 `org-export-data'."
   (let ((raw-link (org-element-property :raw-link link)))
     (cl-case (intern (org-element-property :type link))
-      (fuzzy (ox-linuxmag--format-text:span (format "[%s]" raw-link) "gras"))
+      (fuzzy (ox-linuxmag--format-textspan (format "[%s]" raw-link) "gras"))
       ;; file links are taken care of by the containing paragraph:
       (file nil)
-      (t (ox-linuxmag--format-text:span raw-link "url")))))
+      (t (ox-linuxmag--format-textspan raw-link "url")))))
 
 (defun ox-linuxmag--paragraph (paragraph contents info)
   "Transcode a PARAGRAPH element from Org to ODT.
@@ -350,23 +364,29 @@ the plist used as a communication channel."
          "Normal" "" ""))))))
 
 (defun ox-linuxmag--format-note (contents note-type)
+  "Return a string containing CONTENTS with a box markup.
+
+NOTE-TYPE is a string representing the kind of box."
   (cl-case (intern note-type)
     ('PAO (concat
            (ox-linuxmag--format-pragma "Début note PAO")
-           (ox-linuxmag--format-text:p contents "pragma")
+           (ox-linuxmag--format-textp contents "pragma")
            (ox-linuxmag--format-pragma "Fin note PAO")))
     ((attention avertissement)
      (concat
       (ox-linuxmag--format-pragma (format "Début note : %s" (capitalize note-type)))
-      (ox-linuxmag--format-text:p contents)
+      (ox-linuxmag--format-textp contents)
       (ox-linuxmag--format-pragma "Fin note")))
     (t
      (concat
       (ox-linuxmag--format-pragma (format "Début note"))
-      (ox-linuxmag--format-text:p contents)
+      (ox-linuxmag--format-textp contents)
       (ox-linuxmag--format-pragma "Fin note")))))
 
-(defun ox-linuxmag--format-figure (paragraph contents info)
+(defun ox-linuxmag--format-figure (paragraph _contents info)
+  "Return a string representing the figure in PARAGRAPH.
+
+INFO is a plist holding contextual information."
   (let* ((link (org-element-map paragraph 'link #'identity info t))
          (path (org-element-property :path link))
          (pragma (format "Image : %s" (file-name-nondirectory path)))
@@ -378,15 +398,21 @@ the plist used as a communication channel."
          (legend (org-export-data (org-export-get-caption paragraph) info)))
     (concat
      (ox-linuxmag--format-pragma pragma)
-     (ox-linuxmag--format-text:p (format "Fig. %s : %s" figure-number legend) "legende"))))
+     (ox-linuxmag--format-textp (format "Fig. %s : %s" figure-number legend) "legende"))))
 
-(defun ox-linuxmag--special-block (special-block contents info)
+(defun ox-linuxmag--special-block (special-block contents _info)
+  "Transcode a SPECIAL-BLOCK element from Org to ODT.
+CONTENTS holds the contents of the item.  INFO is a plist holding
+contextual information."
   (let ((type (intern (org-element-property :type special-block))))
     (cl-case type
       (encadre (ox-linuxmag--format-encadre special-block contents))
       (t contents))))
 
 (defun ox-linuxmag--format-encadre (special-block contents)
+  "Return a string containing CONTENTS surrounded with markup for a box.
+
+SPECIAL-BLOCK is the element containing the whole block."
   (let ((title (org-export-read-attribute :attr_linuxmag special-block :titre)))
     (concat
      (ox-linuxmag--format-pragma "Début encadré")
@@ -394,7 +420,7 @@ the plist used as a communication channel."
      contents
      (ox-linuxmag--format-pragma "Fin encadré"))))
 
-(defun ox-linuxmag--src-block (src-block contents info)
+(defun ox-linuxmag--src-block (src-block _contents info)
   "Transcode a SRC-BLOCK element from Org to ODT.
 CONTENTS holds the contents of the item.  INFO is a plist holding
 contextual information."
@@ -402,7 +428,7 @@ contextual information."
                         "code")))
     (mapconcat
      (lambda (line)
-       (ox-linuxmag--format-text:p
+       (ox-linuxmag--format-textp
         (let ((ox-linuxmag--inline-code-style "code_5f_em"))
           (org-export-data
            (org-element-parse-secondary-string line '(code) src-block) info))
@@ -411,6 +437,9 @@ contextual information."
      "\n")))
 
 (defun ox-linuxmag--table (table contents info)
+  "Transcode a TABLE element from Org to ODT.
+CONTENTS holds the contents of the item.  INFO is a plist holding
+contextual information."
   (concat
    (format "<table:table table:style-name=\"Tableau\">")
    (format "<table:table-column table:style-name=\"Tableau.A\" table:number-columns-repeated=\"%s\"/>"
@@ -418,20 +447,20 @@ contextual information."
    contents
    (format "</table:table>")))
 
-(defun ox-linuxmag--table-cell (table-cell contents info)
+(defun ox-linuxmag--table-cell (_table-cell contents _info)
   "Transcode a TABLE-CELL element from Org to ODT.
 CONTENTS is nil.  INFO is a plist used as a communication
 channel."
   (concat
    (format "<table:table-cell table:style-name=\"Tableau.A1\" office:value-type=\"string\">")
-   (ox-linuxmag--format-text:p contents)
+   (ox-linuxmag--format-textp contents)
    (format "</table:table-cell>")))
 
-(defun ox-linuxmag--target (target contents info)
+(defun ox-linuxmag--target (target _contents _info)
   "Transcode a TARGET object from Org to ODT.
 CONTENTS is nil.  INFO is a plist holding contextual
 information."
-  (ox-linuxmag--format-text:span
+  (ox-linuxmag--format-textspan
    (format "[%s]" (org-element-property :value target))
    "gras"))
 
@@ -439,25 +468,37 @@ information."
   "Transcode UNDERLINE from Org to ODT.
 CONTENTS is the text with underline markup.  INFO is a plist
 holding contextual information."
-  (ox-linuxmag--format-text:span contents "menu"))
+  (ox-linuxmag--format-textspan contents "menu"))
 
 
 ;; Utility functions
 
 (defun ox-linuxmag--format-contents (_element contents _info)
+  "Return CONTENTS."
   contents)
 
 (defun ox-linuxmag--format-pragma (pragma)
-  (ox-linuxmag--format-text:p (format "/// %s ///" pragma) "pragma"))
+  "Return a string containing a paragraph with PRAGMA."
+  (ox-linuxmag--format-textp (format "/// %s ///" pragma) "pragma"))
 
-(defun ox-linuxmag--format-text:p (content &optional style)
+(defun ox-linuxmag--format-textp (content &optional style)
+  "Return a string containing a paragraph with CONTENT.
+Use STYLE as the paragraph's style or \"Normal\" if nil."
   (format "<text:p text:style-name=\"%s\">%s</text:p>" (or style "Normal") content))
 
-(defun ox-linuxmag--format-text:h (content &optional style)
-  (format "<text:h text:style-name=\"%s\">%s</text:h>" (or style "Normal") content))
+(defun ox-linuxmag--format-texth (content style)
+  "Return a string containing a header with CONTENT.
+Use STYLE as the header's style."
+  (format "<text:h text:style-name=\"%s\">%s</text:h>" style content))
 
-(defun ox-linuxmag--format-text:span (content &optional style)
-  (format "<text:span text:style-name=\"%s\">%s</text:span>" (or style "Normal") content))
+(defun ox-linuxmag--format-textspan (content style)
+  "Return a string containing a span with CONTENT.
+Use STYLE as the span's style."
+  (format "<text:span text:style-name=\"%s\">%s</text:span>" style content))
 
 (provide 'ox-linuxmag)
 ;;; ox-linuxmag.el ends here
+
+;; LocalWords:  Transcode xml
+;; LocalWords:  plist
+;; LocalWords:  transcoded
