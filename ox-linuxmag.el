@@ -313,17 +313,6 @@ holding contextual information."
      (ox-linuxmag--format-texth full-text (format "Heading_20_%s" level))
      contents)))
 
-(cl-defun ox-linuxmag--format-headline-function (_todo _todo-type _priority text _tags
-		                                       &key section-number
-		                                       &allow-other-keys)
-  "Return a string to be used as content of a headline.
-
-TEXT is the section title and SECTION-NUMBER is a dot-separated
-string identifying the headline."
-  (if (seq-contains-p section-number ?.)
-      (format "%s %s" section-number text)
-    (format "%s. %s" section-number text)))
-
 (defun ox-linuxmag--italic (_italic contents _info)
   "Transcode ITALIC from Org to ODT.
 CONTENTS is the text with italic markup.  INFO is a plist holding
