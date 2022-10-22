@@ -281,6 +281,12 @@ Return output file's name."
 
 ;; Transcoders
 
+(defun ox-linuxmag--bold (_bold contents _info)
+  "Transcode BOLD from Org to ODT.
+CONTENTS is the text with bold markup.  INFO is a plist holding
+contextual information."
+  (ox-linuxmag--format-textspan contents "gras"))
+
 (defun ox-linuxmag--code (code _contents _info)
   "Transcode a CODE object from Org to ODT.
 CONTENTS is nil.  INFO is a plist used as a communication
@@ -288,12 +294,6 @@ channel."
   (format "<text:span text:style-name=\"%s\">%s</text:span>"
 	  ox-linuxmag--inline-code-style
           (org-odt--encode-plain-text (org-element-property :value code))))
-
-(defun ox-linuxmag--bold (_bold contents _info)
-  "Transcode BOLD from Org to ODT.
-CONTENTS is the text with bold markup.  INFO is a plist holding
-contextual information."
-  (ox-linuxmag--format-textspan contents "gras"))
 
 (defun ox-linuxmag--headline (headline contents info)
   "Transcode a HEADLINE element from Org to ODT.
