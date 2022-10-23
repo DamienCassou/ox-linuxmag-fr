@@ -281,6 +281,12 @@ Return output file's name."
 
 ;; Transcoders
 
+(defun ox-linuxmag--bold (_bold contents _info)
+  "Transcode BOLD from Org to ODT.
+CONTENTS is the text with bold markup.  INFO is a plist holding
+contextual information."
+  (ox-linuxmag--format-textspan contents "gras"))
+
 (defun ox-linuxmag--code (code _contents _info)
   "Transcode a CODE object from Org to ODT.
 CONTENTS is nil.  INFO is a plist used as a communication
@@ -288,12 +294,6 @@ channel."
   (format "<text:span text:style-name=\"%s\">%s</text:span>"
 	  ox-linuxmag--inline-code-style
           (org-odt--encode-plain-text (org-element-property :value code))))
-
-(defun ox-linuxmag--bold (_bold contents _info)
-  "Transcode BOLD from Org to ODT.
-CONTENTS is the text with bold markup.  INFO is a plist holding
-contextual information."
-  (ox-linuxmag--format-textspan contents "gras"))
 
 (defun ox-linuxmag--headline (headline contents info)
   "Transcode a HEADLINE element from Org to ODT.
@@ -312,17 +312,6 @@ holding contextual information."
     (concat
      (ox-linuxmag--format-texth full-text (format "Heading_20_%s" level))
      contents)))
-
-(cl-defun ox-linuxmag--format-headline-function (_todo _todo-type _priority text _tags
-		                                       &key section-number
-		                                       &allow-other-keys)
-  "Return a string to be used as content of a headline.
-
-TEXT is the section title and SECTION-NUMBER is a dot-separated
-string identifying the headline."
-  (if (seq-contains-p section-number ?.)
-      (format "%s %s" section-number text)
-    (format "%s. %s" section-number text)))
 
 (defun ox-linuxmag--italic (_italic contents _info)
   "Transcode ITALIC from Org to ODT.

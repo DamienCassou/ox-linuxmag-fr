@@ -156,7 +156,6 @@ voir en figure 1, … ou encore (voir figure 1)).
 #+CAPTION: pour certains articles, il peut s'agir de plusieurs paragraphes,
 #+CAPTION: d'où la nécessité d'utiliser le style « pragma ». Le style utilisé
 #+CAPTION: pour une légende… est « legende ».
-#+NAME:   fig:1
 [[file:media/nom_article_figure_01.png]]
 
 Lorsqu'on décrit une interface graphique ou texte (pas les lignes de
