@@ -1,0 +1,42 @@
+* ox-linuxmag
+  #+BEGIN_HTML
+      <p>
+        <a href="https://github.com/DamienCassou/ox-linuxmag/actions">
+          <img alt="pipeline status" src="https://github.com/DamienCassou/ox-linuxmag/actions/workflows/test.yml/badge.svg" />
+        </a>
+      </p>
+  #+END_HTML
+
+** Summary
+
+This package is an [[https://orgmode.org/][Org Mode]] exporter for the French [[https://www.gnulinuxmag.com/][GNU/Linux
+Magazine]]. As the magazine requires authors to submit ODT files, this
+exporter heavily relies on Org Mode's builtin ODT exporter and
+even inherits from it.
+
+Files of this project include:
+- ~modele-article.org~ :: This is the Org Mode version of the [[https://github.com/GLMF/outils_auteurs][tutorial
+  file]] guiding authors through the styling used by the magazine. Use
+  this file as an example to follow when writing an article. The file
+  ~media/nom_article_figure_01.png~ is referenced by the tutorial.
+
+- ~ox-linuxmag.el~ :: The implementation of the Org Mode exporter.
+
+- ~resources/*~ :: XML files used as input by ~ox-linuxmag.el~. The
+  ~styles.xml~ will be included as is in the resulting ODT file while
+  the ~template.xml~ serves as a base in which the author's content
+  will be inserted.
+
+- ~test/*~ :: Unit tests verifying the code in ~ox-linuxmag.el~. They
+  are only needed for the developers maintaining ~ox-linuxmag.el~.
+
+** Usage
+
+Load ~ox-linuxmag.el~ as you would do with any other Emacs
+package. Then, open an Org Mode file and type ~C-c C-e~ (or ~M-x
+org-export-dispatch~) to open the export dispatcher. Finally, type ~g
+g~ to select the GNU/Linux Magazine exporter.
+
+** License
+
+See [[file:COPYING][COPYING]]. Copyright (c) 2022 [[mailto:damien@cassou.me][Damien Cassou]].
