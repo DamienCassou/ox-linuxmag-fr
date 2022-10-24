@@ -50,11 +50,10 @@
 
 ;; Create the 'linuxmag Org export backend:
 (let ((odt-backend (org-export-get-backend 'odt)))
-  (org-export-register-backend
-   (org-export-create-backend
-    :name 'linuxmag
-    :parent (org-export-backend-name odt-backend)
-    :transcoders
+  (org-export-define-derived-backend
+      'linuxmag
+      'odt
+    :translate-alist
     `((template . ox-linuxmag--template)
       (bold . ox-linuxmag--bold)
       (code . ox-linuxmag--code)
@@ -71,12 +70,12 @@
       (target . ox-linuxmag--target)
       (underline . ox-linuxmag--underline)
       ,@(org-export-backend-transcoders odt-backend))
-    :menu '(?g "Export to ODT for GNU/Linux Magazine"
-               ((?g "As ODT file" ox-linuxmag--export-to-odt)))
-    :options
+    :menu-entry '(?g "Export to ODT for GNU/Linux Magazine"
+                     ((?g "As ODT file" ox-linuxmag-export-to-odt)))
+    :options-alist
     `((:author-description "AUTHOR_DESCRIPTION" nil nil newline)
       (:logos "LOGOS" nil nil newline)
-      ,@(org-export-backend-options odt-backend)))))
+      ,@(org-export-backend-options odt-backend))))
 
 ;; Main exporter functions
 
@@ -212,7 +211,7 @@ INFO is a plist holding contextual information."
 
 ;;; Notes:
 ;;; - same as org-odt-export-to-odt but with 'ox-linuxmag as backend
-(defun ox-linuxmag--export-to-odt (&optional async subtreep visible-only ext-plist)
+(defun ox-linuxmag-export-to-odt (&optional async subtreep visible-only ext-plist)
   "Export current buffer to a ODT file.
 
 If narrowing is active in the current buffer, only export its
