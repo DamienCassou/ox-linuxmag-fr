@@ -71,7 +71,7 @@
       (underline . ox-linuxmag--underline)
       ,@(org-export-backend-transcoders odt-backend))
     :menu-entry '(?g "Export to ODT for GNU/Linux Magazine"
-                     ((?g "As ODT file" ox-linuxmag--export-to-odt)))
+                     ((?g "As ODT file" ox-linuxmag-export-to-odt)))
     :options-alist
     `((:author-description "AUTHOR_DESCRIPTION" nil nil newline)
       (:logos "LOGOS" nil nil newline)
@@ -211,7 +211,7 @@ INFO is a plist holding contextual information."
 
 ;;; Notes:
 ;;; - same as org-odt-export-to-odt but with 'ox-linuxmag as backend
-(defun ox-linuxmag--export-to-odt (&optional async subtreep visible-only ext-plist)
+(defun ox-linuxmag-export-to-odt (&optional async subtreep visible-only ext-plist)
   "Export current buffer to a ODT file.
 
 If narrowing is active in the current buffer, only export its
