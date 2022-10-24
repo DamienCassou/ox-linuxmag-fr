@@ -488,6 +488,6 @@ Use STYLE as the span's style."
 (provide 'ox-linuxmag)
 ;;; ox-linuxmag.el ends here
 
-;; LocalWords:  Transcode xml
-;; LocalWords:  plist
+;; LocalWords:  Transcode xml OpenDocument https github outils
+;; LocalWords:  plist auteurs
 ;; LocalWords:  transcoded
