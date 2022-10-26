@@ -49,33 +49,30 @@
 (defvar ox-linuxmag--inline-code-style "code_5f_par")
 
 ;; Create the 'linuxmag Org export backend:
-(let ((odt-backend (org-export-get-backend 'odt)))
-  (org-export-define-derived-backend
-      'linuxmag
-      'odt
-    :translate-alist
-    `((template . ox-linuxmag--template)
-      (bold . ox-linuxmag--bold)
-      (code . ox-linuxmag--code)
-      (headline . ox-linuxmag--headline)
-      (italic . ox-linuxmag--italic)
-      (item . ox-linuxmag--format-contents)
-      (link . ox-linuxmag--link)
-      (paragraph . ox-linuxmag--paragraph)
-      (plain-list . ox-linuxmag--format-contents)
-      (special-block . ox-linuxmag--special-block)
-      (src-block . ox-linuxmag--src-block)
-      (table . ox-linuxmag--table)
-      (table-cell . ox-linuxmag--table-cell)
-      (target . ox-linuxmag--target)
-      (underline . ox-linuxmag--underline)
-      ,@(org-export-backend-transcoders odt-backend))
-    :menu-entry '(?g "Export to ODT for GNU/Linux Magazine"
-                     ((?g "As ODT file" ox-linuxmag-export-to-odt)))
-    :options-alist
-    `((:author-description "AUTHOR_DESCRIPTION" nil nil newline)
-      (:logos "LOGOS" nil nil newline)
-      ,@(org-export-backend-options odt-backend))))
+(org-export-define-derived-backend
+    'linuxmag
+    'odt
+  :translate-alist
+  `((template . ox-linuxmag--template)
+    (bold . ox-linuxmag--bold)
+    (code . ox-linuxmag--code)
+    (headline . ox-linuxmag--headline)
+    (italic . ox-linuxmag--italic)
+    (item . ox-linuxmag--format-contents)
+    (link . ox-linuxmag--link)
+    (paragraph . ox-linuxmag--paragraph)
+    (plain-list . ox-linuxmag--format-contents)
+    (special-block . ox-linuxmag--special-block)
+    (src-block . ox-linuxmag--src-block)
+    (table . ox-linuxmag--table)
+    (table-cell . ox-linuxmag--table-cell)
+    (target . ox-linuxmag--target)
+    (underline . ox-linuxmag--underline))
+  :menu-entry '(?g "Export to ODT for GNU/Linux Magazine"
+                   ((?g "As ODT file" ox-linuxmag-export-to-odt)))
+  :options-alist
+  `((:author-description "AUTHOR_DESCRIPTION" nil nil newline)
+    (:logos "LOGOS" nil nil newline)))
 
 ;; Main exporter functions
 
