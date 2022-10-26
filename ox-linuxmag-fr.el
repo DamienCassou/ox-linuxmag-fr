@@ -48,7 +48,8 @@
 
 (defvar ox-linuxmag-fr--inline-code-style "code_5f_par")
 
-;; Create the 'linuxmag-fr Org export backend:
+
+;;; Create the 'linuxmag-fr Org export backend
 (org-export-define-derived-backend
     'linuxmag-fr
     'odt
@@ -206,8 +207,8 @@ INFO is a plist holding contextual information."
 
 (defvar nxml-auto-insert-xml-declaration-flag)
 
-;;; Notes:
-;;; - same as org-odt-export-to-odt but with 'ox-linuxmag-fr as backend
+
+;;; End-user function
 (defun ox-linuxmag-fr-export-to-odt (&optional async subtreep visible-only ext-plist)
   "Export current buffer to a ODT file.
 
@@ -275,7 +276,7 @@ Return output file's name."
 	   (with-current-buffer out-buf (erase-buffer) (insert output))))))))
 
 
-;; Transcoders
+;;; Transcoders
 
 (defun ox-linuxmag-fr--bold (_bold contents _info)
   "Transcode BOLD from Org to ODT.
@@ -456,7 +457,7 @@ holding contextual information."
   (ox-linuxmag-fr--format-textspan contents "menu"))
 
 
-;; Utility functions
+;;; Utility functions
 
 (defun ox-linuxmag-fr--format-contents (_element contents _info)
   "Return CONTENTS."
