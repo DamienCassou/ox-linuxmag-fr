@@ -48,7 +48,8 @@
 
 (defvar ox-linuxmag-fr--inline-code-style "code_5f_par")
 
-;; Create the 'linuxmag-fr Org export backend:
+
+;;; Create the 'linuxmag-fr Org export backend
 (org-export-define-derived-backend
     'linuxmag-fr
     'odt
@@ -72,80 +73,12 @@
                    ((?g "As ODT file" ox-linuxmag-fr-export-to-odt)))
   :options-alist
   `((:author-description "AUTHOR_DESCRIPTION" nil nil newline)
-    (:logos "LOGOS" nil nil newline)))
+    (:logos "LOGOS" nil nil newline))
+  :filters-alist '((:filter-final-output . ox-linuxmag-fr--final-function)))
 
 ;; Main exporter functions
 
 (defun ox-linuxmag-fr--template (contents info)
-  "Return complete document string after ODT conversion.
-CONTENTS is the transcoded contents string.  RAW-DATA is the
-original parsed data.  INFO is a plist holding export options."
-  (ox-linuxmag-fr--write-meta-file info)
-  (ox-linuxmag-fr--write-styles-file)
-  (ox-linuxmag-fr--write-template-file contents info))
-
-(defun ox-linuxmag-fr--write-meta-file (info)
-  "Create the contents of the meta.xml file.
-
-INFO is a plist holding contextual information."
-  (let ((title (org-export-data (plist-get info :title) info))
-	(subtitle (org-export-data (plist-get info :subtitle) info))
-	(author (let ((author (plist-get info :author)))
-		  (if (not author) "" (org-export-data author info))))
-	(keywords (or (plist-get info :keywords) ""))
-	(description (or (plist-get info :description) "")))
-    (write-region
-     (concat
-      "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
-     <office:document-meta
-         xmlns:office=\"urn:oasis:names:tc:opendocument:xmlns:office:1.0\"
-         xmlns:xlink=\"http://www.w3.org/1999/xlink\"
-         xmlns:dc=\"http://purl.org/dc/elements/1.1/\"
-         xmlns:meta=\"urn:oasis:names:tc:opendocument:xmlns:meta:1.0\"
-         xmlns:ooo=\"http://openoffice.org/2004/office\"
-         office:version=\"1.2\">
-       <office:meta>\n"
-      (format "<dc:creator>%s</dc:creator>\n" author)
-      (format "<meta:initial-creator>%s</meta:initial-creator>\n" author)
-      ;; Date, if required.
-      (when (plist-get info :with-date)
-	;; Check if DATE is specified as an Org-timestamp.  If yes,
-	;; include it as meta information.  Otherwise, just use
-	;; today's date.
-	(let* ((date (let ((date (plist-get info :date)))
-		       (and (not (cdr date))
-			    (eq (org-element-type (car date)) 'timestamp)
-			    (car date)))))
-	  (let ((iso-date (org-odt--format-timestamp date nil 'iso-date)))
-	    (concat
-	     (format "<dc:date>%s</dc:date>\n" iso-date)
-	     (format "<meta:creation-date>%s</meta:creation-date>\n"
-		     iso-date)))))
-      (format "<meta:generator>%s</meta:generator>\n"
-	      (plist-get info :creator))
-      (format "<meta:keyword>%s</meta:keyword>\n" keywords)
-      (format "<dc:subject>%s</dc:subject>\n" description)
-      (format "<dc:title>%s</dc:title>\n" title)
-      (when (org-string-nw-p subtitle)
-	(format
-	 "<meta:user-defined meta:name=\"subtitle\">%s</meta:user-defined>\n"
-	 subtitle))
-      "\n"
-      "  </office:meta>\n" "</office:document-meta>")
-     nil (concat org-odt-zip-dir "meta.xml"))
-    ;; Add meta.xml in to manifest.
-    (org-odt-create-manifest-file-entry "text/xml" "meta.xml")))
-
-(defun ox-linuxmag-fr--write-styles-file ()
-  "Create the contents of the styles.xml file."
-  (let* ((styles-file (expand-file-name "styles.xml" ox-linuxmag-fr--resources-dir)))
-    (copy-file styles-file (concat org-odt-zip-dir "styles.xml") t)
-    ;; create a manifest entry for styles.xml
-    (org-odt-create-manifest-file-entry "text/xml" "styles.xml")
-    ;; Ensure we have write permissions to this file.
-    (set-file-modes (concat org-odt-zip-dir "styles.xml") #o600)))
-
-(defun ox-linuxmag-fr--write-template-file (contents info)
   "Create the contents of the template.xml file.
 
 CONTENTS is the exported text.  INFO is a plist holding
@@ -206,8 +139,8 @@ INFO is a plist holding contextual information."
 
 (defvar nxml-auto-insert-xml-declaration-flag)
 
-;;; Notes:
-;;; - same as org-odt-export-to-odt but with 'ox-linuxmag-fr as backend
+
+;;; End-user function
 (defun ox-linuxmag-fr-export-to-odt (&optional async subtreep visible-only ext-plist)
   "Export current buffer to a ODT file.
 
@@ -275,7 +208,7 @@ Return output file's name."
 	   (with-current-buffer out-buf (erase-buffer) (insert output))))))))
 
 
-;; Transcoders
+;;; Transcoders
 
 (defun ox-linuxmag-fr--bold (_bold contents _info)
   "Transcode BOLD from Org to ODT.
@@ -456,7 +389,7 @@ holding contextual information."
   (ox-linuxmag-fr--format-textspan contents "menu"))
 
 
-;; Utility functions
+;;; Utility functions
 
 (defun ox-linuxmag-fr--format-contents (_element contents _info)
   "Return CONTENTS."
@@ -480,6 +413,77 @@ Use STYLE as the header's style."
   "Return a string containing a span with CONTENT.
 Use STYLE as the span's style."
   (format "<text:span text:style-name=\"%s\">%s</text:span>" style content))
+
+
+;;; Write secondary files
+
+(defun ox-linuxmag-fr--final-function (_contents _backend info)
+  "Filter to write the secondary files.
+
+INFO is a plist holding contextual information."
+  (ox-linuxmag-fr--write-meta-file info)
+  (ox-linuxmag-fr--write-styles-file))
+
+(defun ox-linuxmag-fr--write-meta-file (info)
+  "Create the contents of the meta.xml file.
+
+INFO is a plist holding contextual information."
+  (let ((title (org-export-data (plist-get info :title) info))
+	(subtitle (org-export-data (plist-get info :subtitle) info))
+	(author (let ((author (plist-get info :author)))
+		  (if (not author) "" (org-export-data author info))))
+	(keywords (or (plist-get info :keywords) ""))
+	(description (or (plist-get info :description) "")))
+    (write-region
+     (concat
+      "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
+     <office:document-meta
+         xmlns:office=\"urn:oasis:names:tc:opendocument:xmlns:office:1.0\"
+         xmlns:xlink=\"http://www.w3.org/1999/xlink\"
+         xmlns:dc=\"http://purl.org/dc/elements/1.1/\"
+         xmlns:meta=\"urn:oasis:names:tc:opendocument:xmlns:meta:1.0\"
+         xmlns:ooo=\"http://openoffice.org/2004/office\"
+         office:version=\"1.2\">
+       <office:meta>\n"
+      (format "<dc:creator>%s</dc:creator>\n" author)
+      (format "<meta:initial-creator>%s</meta:initial-creator>\n" author)
+      ;; Date, if required.
+      (when (plist-get info :with-date)
+	;; Check if DATE is specified as an Org-timestamp.  If yes,
+	;; include it as meta information.  Otherwise, just use
+	;; today's date.
+	(let* ((date (let ((date (plist-get info :date)))
+		       (and (not (cdr date))
+			    (eq (org-element-type (car date)) 'timestamp)
+			    (car date)))))
+	  (let ((iso-date (org-odt--format-timestamp date nil 'iso-date)))
+	    (concat
+	     (format "<dc:date>%s</dc:date>\n" iso-date)
+	     (format "<meta:creation-date>%s</meta:creation-date>\n"
+		     iso-date)))))
+      (format "<meta:generator>%s</meta:generator>\n"
+	      (plist-get info :creator))
+      (format "<meta:keyword>%s</meta:keyword>\n" keywords)
+      (format "<dc:subject>%s</dc:subject>\n" description)
+      (format "<dc:title>%s</dc:title>\n" title)
+      (when (org-string-nw-p subtitle)
+	(format
+	 "<meta:user-defined meta:name=\"subtitle\">%s</meta:user-defined>\n"
+	 subtitle))
+      "\n"
+      "  </office:meta>\n" "</office:document-meta>")
+     nil (concat org-odt-zip-dir "meta.xml"))
+    ;; Add meta.xml in to manifest.
+    (org-odt-create-manifest-file-entry "text/xml" "meta.xml")))
+
+(defun ox-linuxmag-fr--write-styles-file ()
+  "Create the contents of the styles.xml file."
+  (let* ((styles-file (expand-file-name "styles.xml" ox-linuxmag-fr--resources-dir)))
+    (copy-file styles-file (concat org-odt-zip-dir "styles.xml") t)
+    ;; create a manifest entry for styles.xml
+    (org-odt-create-manifest-file-entry "text/xml" "styles.xml")
+    ;; Ensure we have write permissions to this file.
+    (set-file-modes (concat org-odt-zip-dir "styles.xml") #o600)))
 
 (provide 'ox-linuxmag-fr)
 ;;; ox-linuxmag-fr.el ends here
