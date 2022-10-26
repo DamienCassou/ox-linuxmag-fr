@@ -73,19 +73,12 @@
                    ((?g "As ODT file" ox-linuxmag-fr-export-to-odt)))
   :options-alist
   `((:author-description "AUTHOR_DESCRIPTION" nil nil newline)
-    (:logos "LOGOS" nil nil newline)))
+    (:logos "LOGOS" nil nil newline))
+  :filters-alist '((:filter-final-output . ox-linuxmag-fr--final-function)))
 
 ;; Main exporter functions
 
 (defun ox-linuxmag-fr--template (contents info)
-  "Return complete document string after ODT conversion.
-CONTENTS is the transcoded contents string.  RAW-DATA is the
-original parsed data.  INFO is a plist holding export options."
-  (ox-linuxmag-fr--write-meta-file info)
-  (ox-linuxmag-fr--write-styles-file)
-  (ox-linuxmag-fr--write-template-file contents info))
-
-(defun ox-linuxmag-fr--write-template-file (contents info)
   "Create the contents of the template.xml file.
 
 CONTENTS is the exported text.  INFO is a plist holding
@@ -423,6 +416,13 @@ Use STYLE as the span's style."
 
 
 ;;; Write secondary files
+
+(defun ox-linuxmag-fr--final-function (_contents _backend info)
+  "Filter to write the secondary files.
+
+INFO is a plist holding contextual information."
+  (ox-linuxmag-fr--write-meta-file info)
+  (ox-linuxmag-fr--write-styles-file))
 
 (defun ox-linuxmag-fr--write-meta-file (info)
   "Create the contents of the meta.xml file.
