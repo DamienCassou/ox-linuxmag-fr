@@ -62,14 +62,14 @@ ci-dessus. Essayez de commenter votre code et vos commandes shell de
 manière à ne pas avoir d'immenses blocs de code ou de sorties shell
 qui rendent l'article illisible.
 
-#+ATTR_LINUXMAG: :note PAO
+#+ATTR_LINUXMAG-FR: :note PAO
 Le texte ici est destiné à indiquer des informations supplémentaires à
 la rédaction. Il n'apparaîtra pas dans l'article final.
 
 Pour une note apparaissant dans l'article final il faut seulement
 supprimer le terme PAO :
 
-#+ATTR_LINUXMAG: :note t
+#+ATTR_LINUXMAG-FR: :note t
 Le texte présent ici, rédigé en style « Normal », apparaîtra dans
 l'article final dans une boîte spéciale « note ».
 
@@ -79,11 +79,11 @@ Les indications en style « pragma », comme ci-dessus, doivent toujours
 Si vous souhaitez une note ayant pour titre : Avertissement ou
 Attention (avec la petite icône associée), il faut utiliser :
 
-#+ATTR_LINUXMAG: :note attention
+#+ATTR_LINUXMAG-FR: :note attention
 Le texte présent ici, rédigé en style « Normal », apparaîtra dans
 l'article final dans une boîte spéciale « Attention ».
 
-#+ATTR_LINUXMAG: :note avertissement
+#+ATTR_LINUXMAG-FR: :note avertissement
 Le texte présent ici, rédigé en style « Normal », apparaîtra dans
 l'article final dans une boîte spéciale « Avertissement ».
 
@@ -91,7 +91,7 @@ Les sessions de commandes interactives sont à utiliser avec le style
 de paragraphe « console ». On peut également mettre en évidence
 certaines parties, grâce au style de caractère « code​_em » :
 
-#+ATTR_LINUXMAG: :type console
+#+ATTR_LINUXMAG-FR: :type console
 #+begin_src text :style console
 $ cat dma
 2: floppy
@@ -101,7 +101,7 @@ $ cat dma
 
 Le prompt en utilisateur standard est ~$~ et en root il s'agit de ~#~.
 
-#+ATTR_LINUXMAG: :titre Titre encadré
+#+ATTR_LINUXMAG-FR: :titre Titre encadré
 #+begin_encadre
   Vous pouvez créer des encadrés de quelques lignes pour expliquer,
   définir des éléments de manière un peu plus pointue et/ou pour les
