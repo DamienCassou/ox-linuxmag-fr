@@ -134,8 +134,9 @@ INFO is a plist holding contextual information."
     (insert (ox-linuxmag-fr--format-pragma "Mots-clés"))
     (insert (ox-linuxmag-fr--format-textp (export-property :keywords)))
     (insert (ox-linuxmag-fr--format-pragma (format "Fin %s" "Mots-clés")))
-    (dolist (logo (split-string (get-property :logos) ","))
-      (insert (ox-linuxmag-fr--format-pragma (format "Logo : %s" (string-trim logo)))))))
+    (when-let* ((logos (get-property :logos)))
+      (dolist (logo (split-string logos ","))
+        (insert (ox-linuxmag-fr--format-pragma (format "Logo : %s" (string-trim logo))))))))
 
 (defvar nxml-auto-insert-xml-declaration-flag)
 
