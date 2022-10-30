@@ -1,6 +1,14 @@
 * ox-linuxmag-fr
   #+BEGIN_HTML
       <p>
+        <a href="https://stable.melpa.org/#/ox-linuxmag-fr">
+          <img alt="MELPA Stable" src="https://stable.melpa.org/packages/ox-linuxmag-fr-badge.svg"/>
+        </a>
+
+        <a href="https://melpa.org/#/ox-linuxmag-fr">
+          <img alt="MELPA" src="https://melpa.org/packages/ox-linuxmag-fr-badge.svg"/>
+        </a>
+
         <a href="https://github.com/DamienCassou/ox-linuxmag-fr/actions">
           <img alt="pipeline status" src="https://github.com/DamienCassou/ox-linuxmag-fr/actions/workflows/test.yml/badge.svg" />
         </a>

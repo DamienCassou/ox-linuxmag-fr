@@ -92,7 +92,7 @@ de paragraphe « console ». On peut également mettre en évidence
 certaines parties, grâce au style de caractère « code​_em » :
 
 #+ATTR_LINUXMAG-FR: :type console
-#+begin_src text :style console
+#+begin_src text
 $ cat dma
 2: floppy
 3: ~parport0~ # mise en évidence avec ~code_em~

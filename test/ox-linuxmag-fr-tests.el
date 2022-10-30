@@ -3,7 +3,7 @@
 ;; Copyright (C) 2022  Damien Cassou
 
 ;; Author: Damien Cassou <damien@cassou.me>
-;; Version: 0.1.0
+;; Version: 0.2.0
 ;; URL: https://github.com/DamienCassou/ox-linuxmag-fr
 ;; Package-Requires: ((emacs "28.1"))
 
@@ -79,6 +79,17 @@ Make the buffer containing the result current."
   (should (ox-linuxmag-fr-tests-contain "<text:p text:style-name=\"Normal\">keyword1, keyword2, keyword3, keyword4</text:p>"))
   (should (ox-linuxmag-fr-tests-contain "<text:p text:style-name=\"pragma\">/// Logo : Logo1 ///</text:p>"))
   (should (ox-linuxmag-fr-tests-contain "<text:p text:style-name=\"pragma\">/// Logo : Logo2 ///</text:p>")))
+
+(ert-deftest ox-linuxmag-fr-tests-write-preamble-no-logos ()
+  "Logos shouldn't be mandatory."
+  (ox-linuxmag-fr-tests-export
+   "#+title: Titre de l'article
+#+author: Tristan Colombo
+#+author_description: Rédacteur en chef de GLMF
+#+description: Ceci est le chapeau de l'article.
+#+keywords: keyword1, keyword2, keyword3, keyword4
+")
+  (should-not (ox-linuxmag-fr-tests-contain "<text:p text:style-name=\"pragma\">/// Logo")))
 
 (ert-deftest ox-linuxmag-fr-tests-bold ()
   (ox-linuxmag-fr-tests-export "Test *foo*")
