@@ -312,8 +312,9 @@ INFO is a plist holding contextual information."
          (filename (file-name-sans-extension path))
          ;; the figure number is the last number of the filename:
          (figure-number (save-match-data
-                          (string-match (rx ?_ (* ?0) (group-n 1 (+ (any digit))) string-end) filename)
-                          (match-string 1 filename)))
+                          (if (not (string-match (rx ?_ (* ?0) (group-n 1 (+ (any digit))) string-end) filename))
+                              (user-error "'%s' should end with an underscore followed by digits" filename)
+                            (match-string 1 filename))))
          (legend (org-export-data (org-export-get-caption paragraph) info)))
     (concat
      (ox-linuxmag-fr--format-pragma pragma)

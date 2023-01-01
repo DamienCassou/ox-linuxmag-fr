@@ -149,6 +149,12 @@ Make the buffer containing the result current."
   (should (ox-linuxmag-fr-tests-contain "<text:p text:style-name=\"pragma\">/// Image : mypicture_01.png ///</text:p>"))
   (should (ox-linuxmag-fr-tests-contain "<text:p text:style-name=\"legende\">Fig. 1 : Une légende</text:p>")))
 
+(ert-deftest ox-linuxmag-fr-tests-paragraph-picture-throws-when-no-figure-number ()
+  (let ((error (should-error
+                (ox-linuxmag-fr-tests-export "#+CAPTION: Une légende\n[[file:media/mypicture_XXXXXX.png]]")
+                :type 'user-error)))
+    (should (string= (cadr error) "’media/mypicture_XXXXXX’ should end with an underscore followed by digits"))))
+
 (ert-deftest ox-linuxmag-fr-tests-paragraph-default ()
   (ox-linuxmag-fr-tests-export "Some discussion.")
   (should (ox-linuxmag-fr-tests-contain "<text:p text:style-name=\"Normal\">Some discussion.</text:p>")))
