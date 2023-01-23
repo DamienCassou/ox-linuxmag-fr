@@ -353,11 +353,14 @@ contextual information."
     (mapconcat
      (lambda (line)
        (ox-linuxmag-fr--format-textp
-        (let ((ox-linuxmag-fr--inline-code-style "code_5f_em"))
-          (format "%s%s"
+        (let* ((ox-linuxmag-fr--inline-code-style "code_5f_em")
+               (text (org-export-data (org-element-parse-secondary-string line '(code) src-block) info))
+               (deindented-text (string-trim-left text))
+               (indentation-length (- (length text) (length deindented-text))))
+          (format "%s%s%s"
                   prompt
-                  (org-export-data
-                   (org-element-parse-secondary-string line '(code) src-block) info)))
+                  (if (> indentation-length 0) (format "<text:s text:c=\"%s\"/>" indentation-length) "")
+                  deindented-text))
         block-type))
      (org-split-string (org-element-property :value src-block) "\n")
      "\n")))
