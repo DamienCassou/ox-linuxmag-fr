@@ -345,13 +345,22 @@ SPECIAL-BLOCK is the element containing the whole block."
 CONTENTS holds the contents of the item.  INFO is a plist holding
 contextual information."
   (let ((block-type (or (org-export-read-attribute :attr_linuxmag-fr src-block :type)
-                        "code")))
+                        "code"))
+        (prompt (or (org-export-read-attribute :attr_linuxmag-fr src-block :prompt)
+                    "")))
+    (if (and (length> prompt 2) (equal (elt prompt 0) ?'))
+        (setq prompt (string-trim prompt "'" "'")))
     (mapconcat
      (lambda (line)
        (ox-linuxmag-fr--format-textp
-        (let ((ox-linuxmag-fr--inline-code-style "code_5f_em"))
-          (org-export-data
-           (org-element-parse-secondary-string line '(code) src-block) info))
+        (let* ((ox-linuxmag-fr--inline-code-style "code_5f_em")
+               (text (org-export-data (org-element-parse-secondary-string line '(code) src-block) info))
+               (deindented-text (string-trim-left text))
+               (indentation-length (- (length text) (length deindented-text))))
+          (format "%s%s%s"
+                  prompt
+                  (if (> indentation-length 0) (format "<text:s text:c=\"%s\"/>" indentation-length) "")
+                  deindented-text))
         block-type))
      (org-split-string (org-element-property :value src-block) "\n")
      "\n")))

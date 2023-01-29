@@ -192,6 +192,33 @@ bar
 #+end_src")
   (should (ox-linuxmag-fr-tests-contain "<text:p text:style-name=\"console\">bar</text:p>")))
 
+(ert-deftest ox-linuxmag-fr-tests-src-block-with-prompt ()
+  (ox-linuxmag-fr-tests-export "
+#+ATTR_LINUXMAG-FR: :prompt $
+#+begin_src text
+bar
+#+end_src")
+  (should (ox-linuxmag-fr-tests-contain "<text:p text:style-name=\"code\">$bar</text:p>")))
+
+(ert-deftest ox-linuxmag-fr-tests-src-block-with-quoted-prompt ()
+  (ox-linuxmag-fr-tests-export "
+#+ATTR_LINUXMAG-FR: :prompt '$ '
+#+begin_src text
+bar
+#+end_src")
+  (should (ox-linuxmag-fr-tests-contain "<text:p text:style-name=\"code\">$ bar</text:p>")))
+
+(ert-deftest ox-linuxmag-fr-tests-src-block-default-with-indentation ()
+  (ox-linuxmag-fr-tests-export "
+#+begin_src text
+ not-indented
+  indented-1
+   indented-2
+#+end_src")
+  (should (ox-linuxmag-fr-tests-contain "<text:p text:style-name=\"code\">not-indented</text:p>"))
+  (should (ox-linuxmag-fr-tests-contain "<text:p text:style-name=\"code\"><text:s text:c=\"1\"/>indented-1</text:p>"))
+  (should (ox-linuxmag-fr-tests-contain "<text:p text:style-name=\"code\"><text:s text:c=\"2\"/>indented-2</text:p>")))
+
 (ert-deftest ox-linuxmag-fr-tests-table ()
   (ox-linuxmag-fr-tests-export "
 | cell1.1 | cell1.2 |
