@@ -219,6 +219,13 @@ bar
   (should (ox-linuxmag-fr-tests-contain "<text:p text:style-name=\"code\"><text:s text:c=\"1\"/>indented-1</text:p>"))
   (should (ox-linuxmag-fr-tests-contain "<text:p text:style-name=\"code\"><text:s text:c=\"2\"/>indented-2</text:p>")))
 
+(ert-deftest ox-linuxmag-fr-tests-src-block-not-converting-dash-dash ()
+  (ox-linuxmag-fr-tests-export "
+#+begin_src text
+ls --size
+#+end_src")
+  (should (ox-linuxmag-fr-tests-contain "<text:p text:style-name=\"code\">ls --size</text:p>")))
+
 (ert-deftest ox-linuxmag-fr-tests-table ()
   (ox-linuxmag-fr-tests-export "
 | cell1.1 | cell1.2 |
