@@ -354,7 +354,8 @@ contextual information."
      (lambda (line)
        (ox-linuxmag-fr--format-textp
         (let* ((ox-linuxmag-fr--inline-code-style "code_5f_em")
-               (text (org-export-data (org-element-parse-secondary-string line '(code) src-block) info))
+               (text (org-export-data (org-element-parse-secondary-string line '(code) src-block)
+                                      (append '(:with-special-strings nil) info)))
                (deindented-text (string-trim-left text))
                (indentation-length (- (length text) (length deindented-text))))
           (format "%s%s%s"
