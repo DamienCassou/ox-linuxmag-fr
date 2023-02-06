@@ -182,12 +182,7 @@ Return output file's name."
 		    (hfy-user-sheet-assoc nil))
 	       ;; Initialize content.xml and kick-off the export
 	       ;; process.
-	       (let ((out-buf
-		      (progn
-			(require 'nxml-mode)
-			(let ((nxml-auto-insert-xml-declaration-flag nil))
-			  (find-file-noselect
-			   (concat org-odt-zip-dir "content.xml") t))))
+	       (let ((out-buf (ox-linuxmag-fr--content-xml-buffer))
 		     (output (org-export-as
 			      'linuxmag-fr ,subtreep ,visible-only nil ,ext-plist)))
 		 (with-current-buffer out-buf
@@ -201,12 +196,15 @@ Return output file's name."
 	      (org-odt-object-counters nil))
 	 ;; Initialize content.xml and kick-off the export process.
 	 (let ((output (org-export-as 'linuxmag-fr subtreep visible-only nil ext-plist))
-	       (out-buf (progn
-			  (require 'nxml-mode)
-			  (let ((nxml-auto-insert-xml-declaration-flag nil))
-			    (find-file-noselect
-			     (concat org-odt-zip-dir "content.xml") t)))))
+	       (out-buf (ox-linuxmag-fr--content-xml-buffer)))
 	   (with-current-buffer out-buf (erase-buffer) (insert output))))))))
+
+(defun ox-linuxmag-fr--content-xml-buffer ()
+  "Return the buffer containing content.xml."
+  (require 'nxml-mode)
+  (let ((nxml-auto-insert-xml-declaration-flag nil))
+    (find-file-noselect
+     (concat org-odt-zip-dir "content.xml") t)))
 
 
 ;;; Transcoders
