@@ -221,11 +221,7 @@ parameters overriding Org default settings, but still inferior to
 file-local settings.
 
 Return output file's name."
-  (let ((org-odt-embedded-images-count 0)
-	(org-odt-embedded-formulas-count 0)
-	(org-odt-automatic-styles nil)
-        (org-odt-object-counters nil)
-        (content (org-export-as 'linuxmag-fr subtreep visible-only nil ext-plist)))
+  (let ((content (org-export-as 'linuxmag-fr subtreep visible-only nil ext-plist)))
     (with-current-buffer (ox-linuxmag-fr--content-xml-buffer) (erase-buffer) (insert content))))
 
 (defun ox-linuxmag-fr--content-xml-buffer ()
