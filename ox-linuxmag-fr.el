@@ -196,17 +196,37 @@ file-local settings.
 Return output file's name."
   (org-odt--export-wrap
    outfile
-   (let* ((org-odt-embedded-images-count 0)
-	  (org-odt-embedded-formulas-count 0)
-	  (org-odt-automatic-styles nil)
-	  (org-odt-object-counters nil)
-          (other-files (make-hash-table))
+   (let* ((other-files (make-hash-table))
           (ext-plist `(,@ext-plist :ox-linuxmag-fr-other-files ,other-files)))
-     ;; Initialize content.xml and kick-off the export process.
-     (let ((output (org-export-as 'linuxmag-fr subtreep visible-only nil ext-plist))
-	   (out-buf (ox-linuxmag-fr--content-xml-buffer)))
-       (with-current-buffer out-buf (erase-buffer) (insert output)))
+     (ox-linuxmag-fr--write-content-file subtreep visible-only ext-plist)
      (ox-linuxmag-fr--write-secondary-files other-files))))
+
+(defun ox-linuxmag-fr--write-content-file (subtreep visible-only ext-plist)
+  "Write the content.xml file to disk.
+
+If narrowing is active in the current buffer, only export its
+narrowed part.
+
+If a region is active, export that region.
+
+When optional argument SUBTREEP is non-nil, export the sub-tree
+at point, extracting information from the headline properties
+first.
+
+When optional argument VISIBLE-ONLY is non-nil, don't export
+contents of hidden elements.
+
+EXT-PLIST, when provided, is a property list with external
+parameters overriding Org default settings, but still inferior to
+file-local settings.
+
+Return output file's name."
+  (let ((org-odt-embedded-images-count 0)
+	(org-odt-embedded-formulas-count 0)
+	(org-odt-automatic-styles nil)
+        (org-odt-object-counters nil)
+        (content (org-export-as 'linuxmag-fr subtreep visible-only nil ext-plist)))
+    (with-current-buffer (ox-linuxmag-fr--content-xml-buffer) (erase-buffer) (insert content))))
 
 (defun ox-linuxmag-fr--content-xml-buffer ()
   "Return the buffer containing content.xml."
