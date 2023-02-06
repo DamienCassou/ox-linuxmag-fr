@@ -74,7 +74,7 @@
   :options-alist
   `((:author-description "AUTHOR_DESCRIPTION" nil nil newline)
     (:logos "LOGOS" nil nil newline))
-  :filters-alist '((:filter-final-output . ox-linuxmag-fr--write-secondary-files)))
+  :filters-alist '((:filter-options . ox-linuxmag-fr--generate-secondary-files-contents)))
 
 ;; Main exporter functions
 
@@ -199,11 +199,14 @@ Return output file's name."
    (let* ((org-odt-embedded-images-count 0)
 	  (org-odt-embedded-formulas-count 0)
 	  (org-odt-automatic-styles nil)
-	  (org-odt-object-counters nil))
+	  (org-odt-object-counters nil)
+          (other-files (make-hash-table))
+          (ext-plist `(,@ext-plist :ox-linuxmag-fr-other-files ,other-files)))
      ;; Initialize content.xml and kick-off the export process.
      (let ((output (org-export-as 'linuxmag-fr subtreep visible-only nil ext-plist))
 	   (out-buf (ox-linuxmag-fr--content-xml-buffer)))
-       (with-current-buffer out-buf (erase-buffer) (insert output))))))
+       (with-current-buffer out-buf (erase-buffer) (insert output)))
+     (ox-linuxmag-fr--write-secondary-files other-files))))
 
 (defun ox-linuxmag-fr--content-xml-buffer ()
   "Return the buffer containing content.xml."
@@ -433,6 +436,13 @@ Use STYLE as the span's style."
 
 ;;; Write secondary files
 
+(defun ox-linuxmag-fr--generate-secondary-files-contents (info _backend)
+  "Add to INFO the contents of meta.xml.
+
+INFO is a plist holding contextual information."
+  (puthash :meta (ox-linuxmag-fr--make-meta-content info) (plist-get info :ox-linuxmag-fr-other-files))
+  info)
+
 (defun ox-linuxmag-fr--make-meta-content (info)
   "Return the contents of the meta.xml file.
 
@@ -480,9 +490,12 @@ INFO is a plist holding contextual information."
       (insert "</office:document-meta>")
       (buffer-substring-no-properties (point-min) (point-max)))))
 
-(defun ox-linuxmag-fr--write-secondary-files (_contents _backend info)
-  "Write meta.xml and styles.xml to the disk."
-  (ox-linuxmag-fr--write-meta-file (ox-linuxmag-fr--make-meta-content info))
+(defun ox-linuxmag-fr--write-secondary-files (other-files)
+  "Write meta.xml and styles.xml to the disk.
+
+OTHER-FILES is a hashtable with a :meta key and the content of
+meta.xml as value."
+  (ox-linuxmag-fr--write-meta-file (gethash :meta other-files))
   (ox-linuxmag-fr--write-styles-file))
 
 (defun ox-linuxmag-fr--write-meta-file (content)
