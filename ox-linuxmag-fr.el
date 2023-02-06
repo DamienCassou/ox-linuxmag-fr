@@ -74,7 +74,7 @@
   :options-alist
   `((:author-description "AUTHOR_DESCRIPTION" nil nil newline)
     (:logos "LOGOS" nil nil newline))
-  :filters-alist '((:filter-final-output . ox-linuxmag-fr--final-function)))
+  :filters-alist '((:filter-options . ox-linuxmag-fr--generate-secondary-files-contents)))
 
 ;; Main exporter functions
 
@@ -171,42 +171,65 @@ Return output file's name."
     (if async
 	(org-export-async-start (lambda (f) (org-export-add-to-stack f 'linuxmag-fr))
 	  `(expand-file-name
-	    (org-odt--export-wrap
-	     ,outfile
-	     (let* ((org-odt-embedded-images-count 0)
-		    (org-odt-embedded-formulas-count 0)
-		    (org-odt-automatic-styles nil)
-		    (org-odt-object-counters nil)
-		    ;; Let `htmlfontify' know that we are interested in
-		    ;; collecting styles.
-		    (hfy-user-sheet-assoc nil))
-	       ;; Initialize content.xml and kick-off the export
-	       ;; process.
-	       (let ((out-buf
-		      (progn
-			(require 'nxml-mode)
-			(let ((nxml-auto-insert-xml-declaration-flag nil))
-			  (find-file-noselect
-			   (concat org-odt-zip-dir "content.xml") t))))
-		     (output (org-export-as
-			      'linuxmag-fr ,subtreep ,visible-only nil ,ext-plist)))
-		 (with-current-buffer out-buf
-		   (erase-buffer)
-		   (insert output)))))))
-      (org-odt--export-wrap
-       outfile
-       (let* ((org-odt-embedded-images-count 0)
-	      (org-odt-embedded-formulas-count 0)
-	      (org-odt-automatic-styles nil)
-	      (org-odt-object-counters nil))
-	 ;; Initialize content.xml and kick-off the export process.
-	 (let ((output (org-export-as 'linuxmag-fr subtreep visible-only nil ext-plist))
-	       (out-buf (progn
-			  (require 'nxml-mode)
-			  (let ((nxml-auto-insert-xml-declaration-flag nil))
-			    (find-file-noselect
-			     (concat org-odt-zip-dir "content.xml") t)))))
-	   (with-current-buffer out-buf (erase-buffer) (insert output))))))))
+	    (ox-linuxmag-fr--export-to-odt-sync ,outfile ,subtreep ,visible-only ,ext-plist)))
+      (ox-linuxmag-fr--export-to-odt-sync outfile subtreep visible-only ext-plist))))
+
+(defun ox-linuxmag-fr--export-to-odt-sync (outfile subtreep visible-only ext-plist)
+  "Synchronously export current org buffer to a OUTFILE ODT file.
+
+If narrowing is active in the current buffer, only export its
+narrowed part.
+
+If a region is active, export that region.
+
+When optional argument SUBTREEP is non-nil, export the sub-tree
+at point, extracting information from the headline properties
+first.
+
+When optional argument VISIBLE-ONLY is non-nil, don't export
+contents of hidden elements.
+
+EXT-PLIST, when provided, is a property list with external
+parameters overriding Org default settings, but still inferior to
+file-local settings.
+
+Return output file's name."
+  (org-odt--export-wrap
+   outfile
+   (let* ((other-files (make-hash-table))
+          (ext-plist `(,@ext-plist :ox-linuxmag-fr-other-files ,other-files)))
+     (ox-linuxmag-fr--write-content-file subtreep visible-only ext-plist)
+     (ox-linuxmag-fr--write-secondary-files other-files))))
+
+(defun ox-linuxmag-fr--write-content-file (subtreep visible-only ext-plist)
+  "Write the content.xml file to disk.
+
+If narrowing is active in the current buffer, only export its
+narrowed part.
+
+If a region is active, export that region.
+
+When optional argument SUBTREEP is non-nil, export the sub-tree
+at point, extracting information from the headline properties
+first.
+
+When optional argument VISIBLE-ONLY is non-nil, don't export
+contents of hidden elements.
+
+EXT-PLIST, when provided, is a property list with external
+parameters overriding Org default settings, but still inferior to
+file-local settings.
+
+Return output file's name."
+  (let ((content (org-export-as 'linuxmag-fr subtreep visible-only nil ext-plist)))
+    (with-current-buffer (ox-linuxmag-fr--content-xml-buffer) (erase-buffer) (insert content))))
+
+(defun ox-linuxmag-fr--content-xml-buffer ()
+  "Return the buffer containing content.xml."
+  (require 'nxml-mode)
+  (let ((nxml-auto-insert-xml-declaration-flag nil))
+    (find-file-noselect
+     (concat org-odt-zip-dir "content.xml") t)))
 
 
 ;;; Transcoders
@@ -429,15 +452,15 @@ Use STYLE as the span's style."
 
 ;;; Write secondary files
 
-(defun ox-linuxmag-fr--final-function (_contents _backend info)
-  "Filter to write the secondary files.
+(defun ox-linuxmag-fr--generate-secondary-files-contents (info _backend)
+  "Add to INFO the contents of meta.xml.
 
 INFO is a plist holding contextual information."
-  (ox-linuxmag-fr--write-meta-file info)
-  (ox-linuxmag-fr--write-styles-file))
+  (puthash :meta (ox-linuxmag-fr--make-meta-content info) (plist-get info :ox-linuxmag-fr-other-files))
+  info)
 
-(defun ox-linuxmag-fr--write-meta-file (info)
-  "Create the contents of the meta.xml file.
+(defun ox-linuxmag-fr--make-meta-content (info)
+  "Return the contents of the meta.xml file.
 
 INFO is a plist holding contextual information."
   (let ((title (org-export-data (plist-get info :title) info))
@@ -446,9 +469,8 @@ INFO is a plist holding contextual information."
 		  (if (not author) "" (org-export-data author info))))
 	(keywords (or (plist-get info :keywords) ""))
 	(description (or (plist-get info :description) "")))
-    (write-region
-     (concat
-      "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
+    (with-temp-buffer
+      (insert "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
      <office:document-meta
          xmlns:office=\"urn:oasis:names:tc:opendocument:xmlns:office:1.0\"
          xmlns:xlink=\"http://www.w3.org/1999/xlink\"
@@ -456,9 +478,9 @@ INFO is a plist holding contextual information."
          xmlns:meta=\"urn:oasis:names:tc:opendocument:xmlns:meta:1.0\"
          xmlns:ooo=\"http://openoffice.org/2004/office\"
          office:version=\"1.2\">
-       <office:meta>\n"
-      (format "<dc:creator>%s</dc:creator>\n" author)
-      (format "<meta:initial-creator>%s</meta:initial-creator>\n" author)
+       <office:meta>\n")
+      (insert (format "<dc:creator>%s</dc:creator>\n" author))
+      (insert (format "<meta:initial-creator>%s</meta:initial-creator>\n" author))
       ;; Date, if required.
       (when (plist-get info :with-date)
 	;; Check if DATE is specified as an Org-timestamp.  If yes,
@@ -469,24 +491,33 @@ INFO is a plist holding contextual information."
 			    (eq (org-element-type (car date)) 'timestamp)
 			    (car date)))))
 	  (let ((iso-date (org-odt--format-timestamp date nil 'iso-date)))
-	    (concat
-	     (format "<dc:date>%s</dc:date>\n" iso-date)
-	     (format "<meta:creation-date>%s</meta:creation-date>\n"
-		     iso-date)))))
-      (format "<meta:generator>%s</meta:generator>\n"
-	      (plist-get info :creator))
-      (format "<meta:keyword>%s</meta:keyword>\n" keywords)
-      (format "<dc:subject>%s</dc:subject>\n" description)
-      (format "<dc:title>%s</dc:title>\n" title)
+	    (insert (format "<dc:date>%s</dc:date>\n" iso-date))
+	    (insert (format "<meta:creation-date>%s</meta:creation-date>\n" iso-date)))))
+      (insert (format "<meta:generator>%s</meta:generator>\n" (plist-get info :creator)))
+      (insert (format "<meta:keyword>%s</meta:keyword>\n" keywords))
+      (insert (format "<dc:subject>%s</dc:subject>\n" description))
+      (insert (format "<dc:title>%s</dc:title>\n" title))
       (when (org-string-nw-p subtitle)
-	(format
-	 "<meta:user-defined meta:name=\"subtitle\">%s</meta:user-defined>\n"
-	 subtitle))
-      "\n"
-      "  </office:meta>\n" "</office:document-meta>")
-     nil (concat org-odt-zip-dir "meta.xml"))
-    ;; Add meta.xml in to manifest.
-    (org-odt-create-manifest-file-entry "text/xml" "meta.xml")))
+	(insert (format
+	         "<meta:user-defined meta:name=\"subtitle\">%s</meta:user-defined>\n"
+	         subtitle)))
+      (insert "\n")
+      (insert "  </office:meta>\n")
+      (insert "</office:document-meta>")
+      (buffer-substring-no-properties (point-min) (point-max)))))
+
+(defun ox-linuxmag-fr--write-secondary-files (other-files)
+  "Write meta.xml and styles.xml to the disk.
+
+OTHER-FILES is a hashtable with a :meta key and the content of
+meta.xml as value."
+  (ox-linuxmag-fr--write-meta-file (gethash :meta other-files))
+  (ox-linuxmag-fr--write-styles-file))
+
+(defun ox-linuxmag-fr--write-meta-file (content)
+  "Write CONTENT in the meta.xml file."
+  (write-region content nil (concat org-odt-zip-dir "meta.xml"))
+  (org-odt-create-manifest-file-entry "text/xml" "meta.xml"))
 
 (defun ox-linuxmag-fr--write-styles-file ()
   "Create the contents of the styles.xml file."

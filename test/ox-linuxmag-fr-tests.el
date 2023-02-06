@@ -46,7 +46,7 @@ Make the buffer containing the result current."
                           (insert ox-linuxmag-fr-tests-default-preamble)
                           (insert "\n"))
                         (insert string)
-                        (org-export-as 'linuxmag-fr)))
+                        (org-export-as 'linuxmag-fr nil nil nil (list :ox-linuxmag-fr-other-files (make-hash-table)))))
          (buffer (get-buffer-create "*ox-linuxmag-fr-test*")))
     (switch-to-buffer buffer)
     (erase-buffer)
