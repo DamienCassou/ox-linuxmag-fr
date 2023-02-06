@@ -74,7 +74,7 @@
   :options-alist
   `((:author-description "AUTHOR_DESCRIPTION" nil nil newline)
     (:logos "LOGOS" nil nil newline))
-  :filters-alist '((:filter-final-output . ox-linuxmag-fr--final-function)))
+  :filters-alist '((:filter-final-output . ox-linuxmag-fr--write-secondary-files)))
 
 ;; Main exporter functions
 
@@ -433,10 +433,8 @@ Use STYLE as the span's style."
 
 ;;; Write secondary files
 
-(defun ox-linuxmag-fr--final-function (_contents _backend info)
-  "Filter to write the secondary files.
-
-INFO is a plist holding contextual information."
+(defun ox-linuxmag-fr--write-secondary-files (_contents _backend info)
+  "Write meta.xml and styles.xml to the disk."
   (ox-linuxmag-fr--write-meta-file (ox-linuxmag-fr--make-meta-content info))
   (ox-linuxmag-fr--write-styles-file))
 
