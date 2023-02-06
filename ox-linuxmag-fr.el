@@ -433,11 +433,6 @@ Use STYLE as the span's style."
 
 ;;; Write secondary files
 
-(defun ox-linuxmag-fr--write-secondary-files (_contents _backend info)
-  "Write meta.xml and styles.xml to the disk."
-  (ox-linuxmag-fr--write-meta-file (ox-linuxmag-fr--make-meta-content info))
-  (ox-linuxmag-fr--write-styles-file))
-
 (defun ox-linuxmag-fr--make-meta-content (info)
   "Return the contents of the meta.xml file.
 
@@ -484,6 +479,11 @@ INFO is a plist holding contextual information."
       (insert "  </office:meta>\n")
       (insert "</office:document-meta>")
       (buffer-substring-no-properties (point-min) (point-max)))))
+
+(defun ox-linuxmag-fr--write-secondary-files (_contents _backend info)
+  "Write meta.xml and styles.xml to the disk."
+  (ox-linuxmag-fr--write-meta-file (ox-linuxmag-fr--make-meta-content info))
+  (ox-linuxmag-fr--write-styles-file))
 
 (defun ox-linuxmag-fr--write-meta-file (content)
   "Write CONTENT in the meta.xml file."
