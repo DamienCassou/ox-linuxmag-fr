@@ -437,11 +437,11 @@ Use STYLE as the span's style."
   "Filter to write the secondary files.
 
 INFO is a plist holding contextual information."
-  (ox-linuxmag-fr--write-meta-file info)
+  (ox-linuxmag-fr--write-meta-file (ox-linuxmag-fr--make-meta-content info))
   (ox-linuxmag-fr--write-styles-file))
 
-(defun ox-linuxmag-fr--write-meta-file (info)
-  "Create the contents of the meta.xml file.
+(defun ox-linuxmag-fr--make-meta-content (info)
+  "Return the contents of the meta.xml file.
 
 INFO is a plist holding contextual information."
   (let ((title (org-export-data (plist-get info :title) info))
@@ -450,9 +450,8 @@ INFO is a plist holding contextual information."
 		  (if (not author) "" (org-export-data author info))))
 	(keywords (or (plist-get info :keywords) ""))
 	(description (or (plist-get info :description) "")))
-    (write-region
-     (concat
-      "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
+    (with-temp-buffer
+      (insert "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
      <office:document-meta
          xmlns:office=\"urn:oasis:names:tc:opendocument:xmlns:office:1.0\"
          xmlns:xlink=\"http://www.w3.org/1999/xlink\"
@@ -460,9 +459,9 @@ INFO is a plist holding contextual information."
          xmlns:meta=\"urn:oasis:names:tc:opendocument:xmlns:meta:1.0\"
          xmlns:ooo=\"http://openoffice.org/2004/office\"
          office:version=\"1.2\">
-       <office:meta>\n"
-      (format "<dc:creator>%s</dc:creator>\n" author)
-      (format "<meta:initial-creator>%s</meta:initial-creator>\n" author)
+       <office:meta>\n")
+      (insert (format "<dc:creator>%s</dc:creator>\n" author))
+      (insert (format "<meta:initial-creator>%s</meta:initial-creator>\n" author))
       ;; Date, if required.
       (when (plist-get info :with-date)
 	;; Check if DATE is specified as an Org-timestamp.  If yes,
@@ -473,24 +472,25 @@ INFO is a plist holding contextual information."
 			    (eq (org-element-type (car date)) 'timestamp)
 			    (car date)))))
 	  (let ((iso-date (org-odt--format-timestamp date nil 'iso-date)))
-	    (concat
-	     (format "<dc:date>%s</dc:date>\n" iso-date)
-	     (format "<meta:creation-date>%s</meta:creation-date>\n"
-		     iso-date)))))
-      (format "<meta:generator>%s</meta:generator>\n"
-	      (plist-get info :creator))
-      (format "<meta:keyword>%s</meta:keyword>\n" keywords)
-      (format "<dc:subject>%s</dc:subject>\n" description)
-      (format "<dc:title>%s</dc:title>\n" title)
+	    (insert (format "<dc:date>%s</dc:date>\n" iso-date))
+	    (insert (format "<meta:creation-date>%s</meta:creation-date>\n" iso-date)))))
+      (insert (format "<meta:generator>%s</meta:generator>\n" (plist-get info :creator)))
+      (insert (format "<meta:keyword>%s</meta:keyword>\n" keywords))
+      (insert (format "<dc:subject>%s</dc:subject>\n" description))
+      (insert (format "<dc:title>%s</dc:title>\n" title))
       (when (org-string-nw-p subtitle)
-	(format
-	 "<meta:user-defined meta:name=\"subtitle\">%s</meta:user-defined>\n"
-	 subtitle))
-      "\n"
-      "  </office:meta>\n" "</office:document-meta>")
-     nil (concat org-odt-zip-dir "meta.xml"))
-    ;; Add meta.xml in to manifest.
-    (org-odt-create-manifest-file-entry "text/xml" "meta.xml")))
+	(insert (format
+	         "<meta:user-defined meta:name=\"subtitle\">%s</meta:user-defined>\n"
+	         subtitle)))
+      (insert "\n")
+      (insert "  </office:meta>\n")
+      (insert "</office:document-meta>")
+      (buffer-substring-no-properties (point-min) (point-max)))))
+
+(defun ox-linuxmag-fr--write-meta-file (content)
+  "Write CONTENT in the meta.xml file."
+  (write-region content nil (concat org-odt-zip-dir "meta.xml"))
+  (org-odt-create-manifest-file-entry "text/xml" "meta.xml"))
 
 (defun ox-linuxmag-fr--write-styles-file ()
   "Create the contents of the styles.xml file."
