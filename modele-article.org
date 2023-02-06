@@ -4,7 +4,6 @@
 #+description: Ceci est le chapeau de l'article. Il s'agit d'une courte introduction au sujet ou à la problématique. Essayez d'être explicite et de donner envie au lecteur de poursuivre la lecture de l'article.
 #+keywords: Underscore.js, Javascript, Programmation fonctionnelle, Web, Python, Filtre
 #+logos: Debian, Raspberry Pi, GitHub
-#+bibliography: bibliography.json
 
 Un article commence *TOUJOURS* par une introduction qui n'est pas
 numérotée (regardez dans le magazine, il y a une lettrine sur la
