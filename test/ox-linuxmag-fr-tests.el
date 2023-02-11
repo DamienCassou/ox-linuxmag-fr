@@ -113,8 +113,27 @@ Make the buffer containing the result current."
   (should (ox-linuxmag-fr-tests-contain "Test <text:span text:style-name=\"italic\">foo</text:span>")))
 
 (ert-deftest ox-linuxmag-fr-tests-link-fuzzy ()
-  (ox-linuxmag-fr-tests-export "Foo [[1]]")
+  (ox-linuxmag-fr-tests-export "Foo [[1]]
+
+<<1>> https://www.wikipedia.org/")
   (should (ox-linuxmag-fr-tests-contain "Foo <text:span text:style-name=\"gras\">[1]</text:span>")))
+
+(ert-deftest ox-linuxmag-fr-tests-link-fuzzy-figure ()
+  (ox-linuxmag-fr-tests-export "
+See figure [[mypicture]].
+
+#+NAME: mypicture
+#+CAPTION: A legend
+[[file:media/mypicture.png]]
+
+#+NAME: mypicture2
+#+CAPTION: Another legend
+[[file:media/mypicture2.png]]
+
+
+See figure [[mypicture2]].")
+  (should (ox-linuxmag-fr-tests-contain "See figure 1."))
+  (should (ox-linuxmag-fr-tests-contain "See figure 2.")))
 
 (ert-deftest ox-linuxmag-fr-tests-link-url ()
   (ox-linuxmag-fr-tests-export "Foo https://damien.cassou.me")
@@ -145,15 +164,17 @@ Make the buffer containing the result current."
   (should (ox-linuxmag-fr-tests-contain "<text:p text:style-name=\"pragma\">/// Fin note ///</text:p>")))
 
 (ert-deftest ox-linuxmag-fr-tests-paragraph-picture ()
-  (ox-linuxmag-fr-tests-export "#+CAPTION: Une légende\n[[file:media/mypicture_01.png]]")
-  (should (ox-linuxmag-fr-tests-contain "<text:p text:style-name=\"pragma\">/// Image : mypicture_01.png ///</text:p>"))
-  (should (ox-linuxmag-fr-tests-contain "<text:p text:style-name=\"legende\">Fig. 1 : Une légende</text:p>")))
+  (ox-linuxmag-fr-tests-export "
+#+CAPTION: A legend
+[[file:media/myPicture.png]]
 
-(ert-deftest ox-linuxmag-fr-tests-paragraph-picture-throws-when-no-figure-number ()
-  (let ((error (should-error
-                (ox-linuxmag-fr-tests-export "#+CAPTION: Une légende\n[[file:media/mypicture_XXXXXX.png]]")
-                :type 'user-error)))
-    (should (string= (cadr error) "’media/mypicture_XXXXXX’ should end with an underscore followed by digits"))))
+#+CAPTION: Another legend
+[[file:media/myOtherPicture.png]]
+")
+  (should (ox-linuxmag-fr-tests-contain "<text:p text:style-name=\"pragma\">/// Image : myPicture_01.png ///</text:p>"))
+  (should (ox-linuxmag-fr-tests-contain "<text:p text:style-name=\"legende\">Fig. 1 : A legend</text:p>"))
+  (should (ox-linuxmag-fr-tests-contain "<text:p text:style-name=\"pragma\">/// Image : myOtherPicture_02.png ///</text:p>"))
+  (should (ox-linuxmag-fr-tests-contain "<text:p text:style-name=\"legende\">Fig. 2 : Another legend</text:p>")))
 
 (ert-deftest ox-linuxmag-fr-tests-paragraph-default ()
   (ox-linuxmag-fr-tests-export "Some discussion.")

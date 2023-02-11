@@ -272,7 +272,7 @@ CONTENTS is the text with italic markup.  INFO is a plist holding
 contextual information."
   (ox-linuxmag-fr--format-textspan contents "italic"))
 
-(defun ox-linuxmag-fr--link (link _desc _info)
+(defun ox-linuxmag-fr--link (link _desc info)
   "Transcode a LINK object from Org to ODT.
 
 DESC is the description part of the link, or the empty string.
@@ -280,10 +280,38 @@ INFO is a plist holding contextual information.  See
 `org-export-data'."
   (let ((raw-link (org-element-property :raw-link link)))
     (cl-case (intern (org-element-property :type link))
-      (fuzzy (ox-linuxmag-fr--format-textspan (format "[%s]" raw-link) "gras"))
+      (fuzzy (ox-linuxmag-fr--format-fuzzy-link link info))
       ;; file links are taken care of by the containing paragraph:
       (file nil)
       (t (ox-linuxmag-fr--format-textspan raw-link "url")))))
+
+(defun ox-linuxmag-fr--is-paragraph-a-figure-p (paragraph info)
+  "Return non-nil if PARAGRAPH is the definition of an external figure.
+
+INFO is a plist holding contextual information."
+  (org-odt--standalone-link-p paragraph info))
+
+(defun ox-linuxmag-fr--figure-number (element info)
+  "Return the one-based position of the figure ELEMENT in the document.
+Return nil if ELEMENT is not the definition of an external figure.
+
+INFO is a plist holding contextual information."
+  (when (and (eq (org-element-type element) 'paragraph)
+             (ox-linuxmag-fr--is-paragraph-a-figure-p element info))
+    (org-export-get-ordinal element info nil #'ox-linuxmag-fr--is-paragraph-a-figure-p)))
+
+(defun ox-linuxmag-fr--format-fuzzy-link (link info)
+  "Return a string representing LINK.
+
+If LINK targets a figure, the returned string is the one-based
+position of the figure within the document.
+
+INFO is a plist holding contextual information."
+  (let* ((target (org-export-resolve-fuzzy-link link info)))
+    (if (and (eq (org-element-type target) 'paragraph)
+             (ox-linuxmag-fr--is-paragraph-a-figure-p target info))
+        (format (number-to-string (ox-linuxmag-fr--figure-number target info)))
+      (ox-linuxmag-fr--format-textspan (format "[%s]" (org-element-property :raw-link link)) "gras"))))
 
 (defun ox-linuxmag-fr--paragraph (paragraph contents info)
   "Transcode a PARAGRAPH element from Org to ODT.
@@ -293,7 +321,7 @@ the plist used as a communication channel."
     (cond
      (note-type
       (ox-linuxmag-fr--format-note contents note-type))
-     ((org-odt--standalone-link-p paragraph info)
+     ((ox-linuxmag-fr--is-paragraph-a-figure-p paragraph info)
       (ox-linuxmag-fr--format-figure paragraph contents info))
      (t
       (let* ((parent (org-export-get-parent paragraph))
@@ -329,16 +357,15 @@ NOTE-TYPE is a string representing the kind of box."
   "Return a string representing the figure in PARAGRAPH.
 
 INFO is a plist holding contextual information."
-  (let* ((link (org-element-map paragraph 'link #'identity info t))
-         (path (org-element-property :path link))
-         (pragma (format "Image : %s" (file-name-nondirectory path)))
-         (filename (file-name-sans-extension path))
-         ;; the figure number is the last number of the filename:
-         (figure-number (save-match-data
-                          (if (not (string-match (rx ?_ (* ?0) (group-n 1 (+ (any digit))) string-end) filename))
-                              (user-error "'%s' should end with an underscore followed by digits" filename)
-                            (match-string 1 filename))))
-         (legend (org-export-data (org-export-get-caption paragraph) info)))
+  (when-let* ((link (org-element-map paragraph 'link #'identity info t))
+              (path (org-element-property :path link))
+              (figure-number (ox-linuxmag-fr--figure-number paragraph info))
+              (filename (format "%s_%02d.%s"
+                                (file-name-sans-extension (file-name-nondirectory path))
+                                figure-number
+                                (file-name-extension path)))
+              (pragma (format "Image : %s" filename))
+              (legend (org-export-data (org-export-get-caption paragraph) info)))
     (concat
      (ox-linuxmag-fr--format-pragma pragma)
      (ox-linuxmag-fr--format-textp (format "Fig. %s : %s" figure-number legend) "legende"))))
