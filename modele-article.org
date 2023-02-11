@@ -148,14 +148,15 @@ dans le même répertoire que l'article et leur nom sera composé à
 partir du nom de l'article et de leur position dans celui-ci. Il devra
 en outre toujours être précédé d'un underscore. Vous devez également
 toujours faire référence à une figure dans le texte : comme on peut le
-voir en figure 1, … ou encore (voir figure 1)).
+voir en figure [[my-figure]], … ou encore (voir figure [[my-figure]])).
 
+#+NAME: my-figure
 #+CAPTION: Exemple d'écran de démarrage GRUB. Une légende peut être une
 #+CAPTION: simple phrase ou même la mention du numéro de figure. Cependant,
 #+CAPTION: pour certains articles, il peut s'agir de plusieurs paragraphes,
 #+CAPTION: d'où la nécessité d'utiliser le style « pragma ». Le style utilisé
 #+CAPTION: pour une légende… est « legende ».
-[[file:media/nom_article_figure_01.png]]
+[[file:media/nom_article_figure.png]]
 
 Lorsqu'on décrit une interface graphique ou texte (pas les lignes de
 commandes, les interfaces en mode texte comme Midnight Commander par
