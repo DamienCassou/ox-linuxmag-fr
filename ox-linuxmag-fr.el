@@ -40,6 +40,7 @@
 (require 'org-macs)
 (require 'ox)
 (require 'ox-odt)
+(require 'dired-aux) ;; to create the archive file
 
 
 (defconst ox-linuxmag-fr--resources-dir
@@ -194,12 +195,18 @@ parameters overriding Org default settings, but still inferior to
 file-local settings.
 
 Return output file's name."
-  (org-odt--export-wrap
-   outfile
-   (let* ((other-files (make-hash-table))
-          (ext-plist `(,@ext-plist :ox-linuxmag-fr-other-files ,other-files)))
-     (ox-linuxmag-fr--write-content-file subtreep visible-only ext-plist)
-     (ox-linuxmag-fr--write-secondary-files other-files))))
+  (let* ((basename (file-name-nondirectory (file-name-sans-extension outfile)))
+         (figure-files (make-hash-table)))
+    (org-odt--export-wrap
+     outfile
+     (let* ((other-files (make-hash-table))
+            (ext-plist `(,@ext-plist
+                         :ox-linuxmag-fr-basename ,basename
+                         :ox-linuxmag-fr-figure-files ,figure-files
+                         :ox-linuxmag-fr-other-files ,other-files)))
+       (ox-linuxmag-fr--write-content-file subtreep visible-only ext-plist)
+       (ox-linuxmag-fr--write-secondary-files other-files)))
+    (ox-linuxmag-fr--archive-odt-and-figures basename outfile figure-files)))
 
 (defun ox-linuxmag-fr--write-content-file (subtreep visible-only ext-plist)
   "Write the content.xml file to disk.
@@ -360,12 +367,18 @@ INFO is a plist holding contextual information."
   (when-let* ((link (org-element-map paragraph 'link #'identity info t))
               (path (org-element-property :path link))
               (figure-number (ox-linuxmag-fr--figure-number paragraph info))
-              (filename (format "%s_%02d.%s"
+              (filename (format "%s_%s_%02d.%s"
+                                (plist-get info :ox-linuxmag-fr-basename)
                                 (file-name-sans-extension (file-name-nondirectory path))
                                 figure-number
                                 (file-name-extension path)))
               (pragma (format "Image : %s" filename))
               (legend (org-export-data (org-export-get-caption paragraph) info)))
+    (puthash figure-number
+             (list
+              :source-filename path
+              :target-filename filename)
+             (plist-get info :ox-linuxmag-fr-figure-files))
     (concat
      (ox-linuxmag-fr--format-pragma pragma)
      (ox-linuxmag-fr--format-textp (format "Fig. %s : %s" figure-number legend) "legende"))))
@@ -554,6 +567,52 @@ meta.xml as value."
     (org-odt-create-manifest-file-entry "text/xml" "styles.xml")
     ;; Ensure we have write permissions to this file.
     (set-file-modes (concat org-odt-zip-dir "styles.xml") #o600)))
+
+
+;;; Create archive file with ODT file and referenced figures
+
+(defun ox-linuxmag-fr--archive-odt-and-figures (basename odt-file figure-files)
+  "Create an archive file in `default-directory'.
+
+The archive file will be named after BASENAME with the archive
+extension appended.  The ODT-FILE and the FIGURE-FILES will be
+added to the archive."
+  (when-let* ((archive-directory (make-temp-file (format "%s-" basename) t)))
+    (ox-linuxmag-fr--add-files-to-archive-directory
+     (file-name-as-directory archive-directory)
+     odt-file
+     figure-files)
+    (ox-linuxmag-fr--make-archive archive-directory basename)))
+
+(defun ox-linuxmag-fr--add-files-to-archive-directory (archive-directory odt-file figure-files)
+  "Add ODT-FILE and FIGURE-FILES to ARCHIVE-DIRECTORY."
+  (rename-file odt-file archive-directory)
+  (ox-linuxmag-fr--copy-figure-files-to-archive-directory figure-files archive-directory))
+
+(defun ox-linuxmag-fr--copy-figure-files-to-archive-directory (figure-files archive-directory)
+  "Copy each of FIGURE-FILES to ARCHIVE-DIRECTORY.
+FIGURE-FILES is a map whose keys are ignored and whose values
+are (:source-filename SOURCE :target-filename TARGET)."
+  (pcase-dolist (`(:source-filename ,source :target-filename ,target)
+                 (map-values figure-files))
+    (copy-file
+     source
+     (expand-file-name target archive-directory))))
+
+(defun ox-linuxmag-fr--make-archive (archive-directory basename)
+  "Create an archive file named after BASENAME.
+The content of the archive is the ARCHIVE-DIRECTORY."
+  (let ((compressed-file (dired-compress-file archive-directory)))
+    (rename-file
+     compressed-file
+     (expand-file-name
+      (format "%s.%s"
+              basename
+              ;; Same as calling `file-name-extension' but handles
+              ;; files with multiple extensions, e.g., .tar.gz:
+              (substring compressed-file (1+ (seq-position compressed-file ?.))))
+      default-directory)
+     t)))
 
 (provide 'ox-linuxmag-fr)
 ;;; ox-linuxmag-fr.el ends here

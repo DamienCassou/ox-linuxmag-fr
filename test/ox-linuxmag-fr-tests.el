@@ -38,15 +38,28 @@
   #+logos: Logo1, Logo2
   ")
 
-(defun ox-linuxmag-fr-tests-export (string)
+(cl-defun ox-linuxmag-fr-tests-export
+    (string &key
+            (ox-linuxmag-fr-figure-files (make-hash-table))
+            (ox-linuxmag-fr-other-files (make-hash-table))
+            (ox-linuxmag-fr-basename "article"))
   "Export Org content STRING into a Linux Magazine ODT.
-Make the buffer containing the result current."
+Make the buffer containing the result current.
+
+OX-LINUXMAG-FR-FIGURE-FILES and OX-LINUXMAG-FR-OTHER-FILES are
+hashtables.  OX-LINUXMAG-FR-BASENAME is a string."
   (let* ((xml-content (with-temp-buffer
                         (unless (string-prefix-p "#+title:" string)
                           (insert ox-linuxmag-fr-tests-default-preamble)
                           (insert "\n"))
                         (insert string)
-                        (org-export-as 'linuxmag-fr nil nil nil (list :ox-linuxmag-fr-other-files (make-hash-table)))))
+                        (org-export-as 'linuxmag-fr nil nil nil
+                                       (list :ox-linuxmag-fr-figure-files
+                                             ox-linuxmag-fr-figure-files
+                                             :ox-linuxmag-fr-other-files
+                                             ox-linuxmag-fr-other-files
+                                             :ox-linuxmag-fr-basename
+                                             ox-linuxmag-fr-basename))))
          (buffer (get-buffer-create "*ox-linuxmag-fr-test*")))
     (switch-to-buffer buffer)
     (erase-buffer)
@@ -170,10 +183,10 @@ See figure [[mypicture2]].")
 
 #+CAPTION: Another legend
 [[file:media/myOtherPicture.png]]
-")
-  (should (ox-linuxmag-fr-tests-contain "<text:p text:style-name=\"pragma\">/// Image : myPicture_01.png ///</text:p>"))
+" :ox-linuxmag-fr-basename "myArticle")
+  (should (ox-linuxmag-fr-tests-contain "<text:p text:style-name=\"pragma\">/// Image : myArticle_myPicture_01.png ///</text:p>"))
   (should (ox-linuxmag-fr-tests-contain "<text:p text:style-name=\"legende\">Fig. 1 : A legend</text:p>"))
-  (should (ox-linuxmag-fr-tests-contain "<text:p text:style-name=\"pragma\">/// Image : myOtherPicture_02.png ///</text:p>"))
+  (should (ox-linuxmag-fr-tests-contain "<text:p text:style-name=\"pragma\">/// Image : myArticle_myOtherPicture_02.png ///</text:p>"))
   (should (ox-linuxmag-fr-tests-contain "<text:p text:style-name=\"legende\">Fig. 2 : Another legend</text:p>")))
 
 (ert-deftest ox-linuxmag-fr-tests-paragraph-default ()
