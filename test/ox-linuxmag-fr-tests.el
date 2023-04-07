@@ -269,8 +269,18 @@ ls --size
   (should (ox-linuxmag-fr-tests-contain "<table:table-column table:style-name=\"Tableau.A\" table:number-columns-repeated=\"2\"/>"))
   (should (ox-linuxmag-fr-tests-contain "<table:table-cell table:style-name=\"Tableau.A1\" office:value-type=\"string\">"))
   (should (ox-linuxmag-fr-tests-contain "<text:p text:style-name=\"Normal\">cell1.1</text:p>"))
+  (should (ox-linuxmag-fr-tests-contain "<text:p text:style-name=\"Normal\">cell1.2</text:p>"))
+  (should (ox-linuxmag-fr-tests-contain "<text:p text:style-name=\"Normal\">cell2.1</text:p>"))
+  (should (ox-linuxmag-fr-tests-contain "<text:p text:style-name=\"Normal\">cell2.2</text:p>"))
   (should (ox-linuxmag-fr-tests-contain "</table:table-cell>"))
   (should (ox-linuxmag-fr-tests-contain "</table:table>")))
+
+(ert-deftest ox-linuxmag-fr-tests-table-empty-cell ()
+  (ox-linuxmag-fr-tests-export "
+| cell1.1 |  |
+")
+  (should (ox-linuxmag-fr-tests-contain "cell1.1"))
+  (should (ox-linuxmag-fr-tests-contain "<table:table-cell table:style-name=\"Tableau.A1\" office:value-type=\"string\"></table:table-cell>")))
 
 (ert-deftest ox-linuxmag-fr-tests-target ()
   (ox-linuxmag-fr-tests-export "<<1>> foo")
