@@ -586,7 +586,7 @@ added to the archive."
 
 (defun ox-linuxmag-fr--add-files-to-archive-directory (archive-directory odt-file figure-files)
   "Add ODT-FILE and FIGURE-FILES to ARCHIVE-DIRECTORY."
-  (rename-file odt-file archive-directory)
+  (copy-file odt-file archive-directory)
   (ox-linuxmag-fr--copy-figure-files-to-archive-directory figure-files archive-directory))
 
 (defun ox-linuxmag-fr--copy-figure-files-to-archive-directory (figure-files archive-directory)
