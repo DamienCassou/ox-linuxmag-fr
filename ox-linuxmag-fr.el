@@ -446,7 +446,7 @@ CONTENTS is nil.  INFO is a plist used as a communication
 channel."
   (concat
    (format "<table:table-cell table:style-name=\"Tableau.A1\" office:value-type=\"string\">")
-   (ox-linuxmag-fr--format-textp contents)
+   (when contents (ox-linuxmag-fr--format-textp contents))
    (format "</table:table-cell>")))
 
 (defun ox-linuxmag-fr--target (target _contents _info)

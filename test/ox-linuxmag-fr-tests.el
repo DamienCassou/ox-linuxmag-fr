@@ -272,6 +272,13 @@ ls --size
   (should (ox-linuxmag-fr-tests-contain "</table:table-cell>"))
   (should (ox-linuxmag-fr-tests-contain "</table:table>")))
 
+(ert-deftest ox-linuxmag-fr-tests-table-empty-cell ()
+  (ox-linuxmag-fr-tests-export "
+| cell1.1 |  |
+")
+  (should (ox-linuxmag-fr-tests-contain "cell1.1"))
+  (should (ox-linuxmag-fr-tests-contain "<table:table-cell table:style-name=\"Tableau.A1\" office:value-type=\"string\"></table:table-cell>")))
+
 (ert-deftest ox-linuxmag-fr-tests-target ()
   (ox-linuxmag-fr-tests-export "<<1>> foo")
   (should (ox-linuxmag-fr-tests-contain "<text:span text:style-name=\"gras\">[1]</text:span> foo")))
