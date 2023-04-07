@@ -269,6 +269,9 @@ ls --size
   (should (ox-linuxmag-fr-tests-contain "<table:table-column table:style-name=\"Tableau.A\" table:number-columns-repeated=\"2\"/>"))
   (should (ox-linuxmag-fr-tests-contain "<table:table-cell table:style-name=\"Tableau.A1\" office:value-type=\"string\">"))
   (should (ox-linuxmag-fr-tests-contain "<text:p text:style-name=\"Normal\">cell1.1</text:p>"))
+  (should (ox-linuxmag-fr-tests-contain "<text:p text:style-name=\"Normal\">cell1.2</text:p>"))
+  (should (ox-linuxmag-fr-tests-contain "<text:p text:style-name=\"Normal\">cell2.1</text:p>"))
+  (should (ox-linuxmag-fr-tests-contain "<text:p text:style-name=\"Normal\">cell2.2</text:p>"))
   (should (ox-linuxmag-fr-tests-contain "</table:table-cell>"))
   (should (ox-linuxmag-fr-tests-contain "</table:table>")))
 
