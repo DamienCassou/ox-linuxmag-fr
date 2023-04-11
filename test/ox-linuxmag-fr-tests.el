@@ -1,6 +1,6 @@
 ;;; ox-linuxmag-fr-tests.el --- Tests for ox-linuxmag-fr   -*- lexical-binding: t; -*-
 
-;; Copyright (C) 2022  Damien Cassou
+;; Copyright (C) 2022-2023  Damien Cassou
 
 ;; Author: Damien Cassou <damien@cassou.me>
 ;; Version: 0.3.0
