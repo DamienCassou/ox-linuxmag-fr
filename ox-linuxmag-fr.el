@@ -409,14 +409,21 @@ CONTENTS holds the contents of the item.  INFO is a plist holding
 contextual information."
   (let ((block-type (or (org-export-read-attribute :attr_linuxmag-fr src-block :type)
                         "code"))
-        (info `(
-                :translate-alist ((plain-text . ,(lambda (data _info) (org-odt--encode-plain-text data)))
-                                  ,@(plist-get info :translate-alist))
-                ,@info)))
+        (info (ox-linuxmag-fr--src-block-rewrite-info info)))
     (mapconcat
      (lambda (line) (ox-linuxmag-fr--src-block-convert-line line src-block block-type info))
      (org-split-string (org-element-property :value src-block) "\n")
      "\n")))
+
+(defun ox-linuxmag-fr--src-block-rewrite-info (info)
+  "Rewrite INFO so spaces in plain-text strings are preserved.
+
+INFO is a plist holding contextual information."
+  (let* ((identity-transcoder (lambda (data _info) (org-odt--encode-plain-text data)))
+         (initial-translate-alist (plist-get info :translate-alist))
+         (translate-alist `((plain-text . ,identity-transcoder)
+                            ,@initial-translate-alist)))
+    `(:translate-alist ,translate-alist ,@info)))
 
 (defun ox-linuxmag-fr--src-block-convert-line (line src-block block-type info)
   "Convert string LINE into ODT.
@@ -425,10 +432,11 @@ SRC-BLOCK is the Org parsed element containing this
 line.  BLOCK-TYPE is either \"console\" or \"code\".  INFO is a
 plist holding contextual information."
   (ox-linuxmag-fr--format-textp
-   (let* ((ox-linuxmag-fr--inline-code-style "code_5f_em"))
-     (concat
-      (ox-linuxmag-fr--src-block-prompt src-block)
-      (org-export-data (org-element-parse-secondary-string line '(code) src-block) info)))
+   (let* ((ox-linuxmag-fr--inline-code-style "code_5f_em")
+          (text (org-export-data
+                 (org-element-parse-secondary-string line '(code) src-block)
+                 info)))
+     (concat (ox-linuxmag-fr--src-block-prompt src-block) text))
    block-type))
 
 (defun ox-linuxmag-fr--src-block-prompt (src-block)
