@@ -408,21 +408,28 @@ SPECIAL-BLOCK is the element containing the whole block."
 CONTENTS holds the contents of the item.  INFO is a plist holding
 contextual information."
   (let ((block-type (or (org-export-read-attribute :attr_linuxmag-fr src-block :type)
-                        "code")))
+                        "code"))
+        (info `(
+                :translate-alist ((plain-text . ,(lambda (data _info) (org-odt--encode-plain-text data)))
+                                  ,@(plist-get info :translate-alist))
+                ,@info)))
     (mapconcat
-     (lambda (line)
-       (ox-linuxmag-fr--format-textp
-        (let* ((ox-linuxmag-fr--inline-code-style "code_5f_em")
-               (text (org-export-data (org-element-parse-secondary-string line '(code) src-block)
-                                      `(
-                                        :translate-alist ((plain-text . ,(lambda (data _info)
-                                                                           (org-odt--encode-plain-text data)))
-                                                          ,@(plist-get info :translate-alist))
-                                        ,@info))))
-          (concat (ox-linuxmag-fr--src-block-prompt src-block) text))
-        block-type))
+     (lambda (line) (ox-linuxmag-fr--src-block-convert-line line src-block block-type info))
      (org-split-string (org-element-property :value src-block) "\n")
      "\n")))
+
+(defun ox-linuxmag-fr--src-block-convert-line (line src-block block-type info)
+  "Convert string LINE into ODT.
+
+SRC-BLOCK is the Org parsed element containing this
+line.  BLOCK-TYPE is either \"console\" or \"code\".  INFO is a
+plist holding contextual information."
+  (ox-linuxmag-fr--format-textp
+   (let* ((ox-linuxmag-fr--inline-code-style "code_5f_em"))
+     (concat
+      (ox-linuxmag-fr--src-block-prompt src-block)
+      (org-export-data (org-element-parse-secondary-string line '(code) src-block) info)))
+   block-type))
 
 (defun ox-linuxmag-fr--src-block-prompt (src-block)
   "Return a string corresponding to the prompt for SRC-BLOCK.
