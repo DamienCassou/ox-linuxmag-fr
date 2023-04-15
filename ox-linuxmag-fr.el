@@ -417,19 +417,13 @@ contextual information."
      (lambda (line)
        (ox-linuxmag-fr--format-textp
         (let* ((ox-linuxmag-fr--inline-code-style "code_5f_em")
-               ;; Remove leading space before parsing to avoid bug
-               ;; https://orgmode.org/list/87v8i3y135.fsf@cassou.me
-               (leading (save-match-data (and (string-match (rx bos (1+ blank)) line)
-                                              (match-string 0 line))))
-               (text (concat leading
-                             (string-trim (org-export-data (org-element-parse-secondary-string line '(code) src-block)
-                                                           (append '(:with-special-strings nil) info)))))
-               (deindented-text (string-trim-left text))
-               (indentation-length (- (length text) (length deindented-text))))
-          (format "%s%s%s"
-                  prompt
-                  (if (> indentation-length 0) (format "<text:s text:c=\"%s\"/>" indentation-length) "")
-                  deindented-text))
+               (text (org-export-data (org-element-parse-secondary-string line '(code) src-block)
+                                      `(
+                                        :translate-alist ((plain-text . ,(lambda (data _info)
+                                                                           (org-odt--encode-plain-text data)))
+                                                          ,@(plist-get info :translate-alist))
+                                        ,@info))))
+          (concat prompt text))
         block-type))
      (org-split-string (org-element-property :value src-block) "\n")
      "\n")))
