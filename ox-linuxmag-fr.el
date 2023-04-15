@@ -408,11 +408,7 @@ SPECIAL-BLOCK is the element containing the whole block."
 CONTENTS holds the contents of the item.  INFO is a plist holding
 contextual information."
   (let ((block-type (or (org-export-read-attribute :attr_linuxmag-fr src-block :type)
-                        "code"))
-        (prompt (or (org-export-read-attribute :attr_linuxmag-fr src-block :prompt)
-                    "")))
-    (if (and (length> prompt 2) (equal (elt prompt 0) ?'))
-        (setq prompt (string-trim prompt "'" "'")))
+                        "code")))
     (mapconcat
      (lambda (line)
        (ox-linuxmag-fr--format-textp
@@ -423,10 +419,27 @@ contextual information."
                                                                            (org-odt--encode-plain-text data)))
                                                           ,@(plist-get info :translate-alist))
                                         ,@info))))
-          (concat prompt text))
+          (concat (ox-linuxmag-fr--src-block-prompt src-block) text))
         block-type))
      (org-split-string (org-element-property :value src-block) "\n")
      "\n")))
+
+(defun ox-linuxmag-fr--src-block-prompt (src-block)
+  "Return a string corresponding to the prompt for SRC-BLOCK.
+
+The prompt of an SRC-BLOCK is defined with
+
+  #+ATTR_LINUXMAG-FR: :type console :prompt '$ '"
+  (let* ((quoting-char ?')
+         (prompt-attribute (or
+                            (org-export-read-attribute :attr_linuxmag-fr src-block :prompt)
+                            "")))
+    ;; remove quotes if any:
+    (if (and (length> prompt-attribute 2)
+             (eq (aref prompt-attribute 0) quoting-char)
+             (eq (aref prompt-attribute (1- (length prompt-attribute))) quoting-char))
+        (substring-no-properties prompt-attribute 1 -1)
+      prompt-attribute)))
 
 (defun ox-linuxmag-fr--table (table contents info)
   "Transcode a TABLE element from Org to ODT.
