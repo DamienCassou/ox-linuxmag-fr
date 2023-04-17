@@ -409,30 +409,52 @@ CONTENTS holds the contents of the item.  INFO is a plist holding
 contextual information."
   (let ((block-type (or (org-export-read-attribute :attr_linuxmag-fr src-block :type)
                         "code"))
-        (prompt (or (org-export-read-attribute :attr_linuxmag-fr src-block :prompt)
-                    "")))
-    (if (and (length> prompt 2) (equal (elt prompt 0) ?'))
-        (setq prompt (string-trim prompt "'" "'")))
+        (info (ox-linuxmag-fr--src-block-rewrite-info info)))
     (mapconcat
-     (lambda (line)
-       (ox-linuxmag-fr--format-textp
-        (let* ((ox-linuxmag-fr--inline-code-style "code_5f_em")
-               ;; Remove leading space before parsing to avoid bug
-               ;; https://orgmode.org/list/87v8i3y135.fsf@cassou.me
-               (leading (save-match-data (and (string-match (rx bos (1+ blank)) line)
-                                              (match-string 0 line))))
-               (text (concat leading
-                             (string-trim (org-export-data (org-element-parse-secondary-string line '(code) src-block)
-                                                           (append '(:with-special-strings nil) info)))))
-               (deindented-text (string-trim-left text))
-               (indentation-length (- (length text) (length deindented-text))))
-          (format "%s%s%s"
-                  prompt
-                  (if (> indentation-length 0) (format "<text:s text:c=\"%s\"/>" indentation-length) "")
-                  deindented-text))
-        block-type))
+     (lambda (line) (ox-linuxmag-fr--src-block-convert-line line src-block block-type info))
      (org-split-string (org-element-property :value src-block) "\n")
      "\n")))
+
+(defun ox-linuxmag-fr--src-block-rewrite-info (info)
+  "Rewrite INFO so spaces in plain-text strings are preserved.
+
+INFO is a plist holding contextual information."
+  (let* ((identity-transcoder (lambda (data _info) (org-odt--encode-plain-text data)))
+         (initial-translate-alist (plist-get info :translate-alist))
+         (translate-alist `((plain-text . ,identity-transcoder)
+                            ,@initial-translate-alist)))
+    `(:translate-alist ,translate-alist ,@info)))
+
+(defun ox-linuxmag-fr--src-block-convert-line (line src-block block-type info)
+  "Convert string LINE into ODT.
+
+SRC-BLOCK is the Org parsed element containing this
+line.  BLOCK-TYPE is either \"console\" or \"code\".  INFO is a
+plist holding contextual information."
+  (ox-linuxmag-fr--format-textp
+   (let* ((ox-linuxmag-fr--inline-code-style "code_5f_em")
+          (text (org-export-data
+                 (org-element-parse-secondary-string line '(code) src-block)
+                 info)))
+     (concat (ox-linuxmag-fr--src-block-prompt src-block) text))
+   block-type))
+
+(defun ox-linuxmag-fr--src-block-prompt (src-block)
+  "Return a string corresponding to the prompt for SRC-BLOCK.
+
+The prompt of an SRC-BLOCK is defined with
+
+  #+ATTR_LINUXMAG-FR: :type console :prompt '$ '"
+  (let* ((quoting-char ?')
+         (prompt-attribute (or
+                            (org-export-read-attribute :attr_linuxmag-fr src-block :prompt)
+                            "")))
+    ;; remove quotes if any:
+    (if (and (length> prompt-attribute 2)
+             (eq (aref prompt-attribute 0) quoting-char)
+             (eq (aref prompt-attribute (1- (length prompt-attribute))) quoting-char))
+        (substring-no-properties prompt-attribute 1 -1)
+      prompt-attribute)))
 
 (defun ox-linuxmag-fr--table (table contents info)
   "Transcode a TABLE element from Org to ODT.

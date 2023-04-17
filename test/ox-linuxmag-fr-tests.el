@@ -250,8 +250,22 @@ bar
    indented-2
 #+end_src")
   (should (ox-linuxmag-fr-tests-contain "<text:p text:style-name=\"code\">not-indented</text:p>"))
-  (should (ox-linuxmag-fr-tests-contain "<text:p text:style-name=\"code\"><text:s text:c=\"1\"/>indented-1</text:p>"))
-  (should (ox-linuxmag-fr-tests-contain "<text:p text:style-name=\"code\"><text:s text:c=\"2\"/>indented-2</text:p>")))
+  (should (ox-linuxmag-fr-tests-contain "<text:p text:style-name=\"code\"> indented-1</text:p>"))
+  (should (ox-linuxmag-fr-tests-contain "<text:p text:style-name=\"code\"> <text:s text:c=\"1\"/>indented-2</text:p>")))
+
+(ert-deftest ox-linuxmag-fr-tests-src-block-preserves-white-space ()
+  (ox-linuxmag-fr-tests-export "
+#+begin_src text
+a     b
+#+end_src")
+  (should (ox-linuxmag-fr-tests-contain "<text:p text:style-name=\"code\">a <text:s text:c=\"4\"/>b</text:p>")))
+
+(ert-deftest ox-linuxmag-fr-tests-src-block-protects-xml-chars ()
+  (ox-linuxmag-fr-tests-export "
+#+begin_src text
+ <damien@cassou.me>
+#+end_src")
+  (should (ox-linuxmag-fr-tests-contain "<text:p text:style-name=\"code\">&lt;damien@cassou.me&gt;</text:p>")))
 
 (ert-deftest ox-linuxmag-fr-tests-src-block-not-converting-dash-dash ()
   (ox-linuxmag-fr-tests-export "
