@@ -304,10 +304,5 @@ ls --size
   (ox-linuxmag-fr-tests-export "Click on _File_.")
   (should (ox-linuxmag-fr-tests-contain "Click on <text:span text:style-name=\"menu\">File</text:span>.")))
 
-;; tableb
-;; table-cell
-;; target
-;; underline
-
 (provide 'ox-linuxmag-fr-tests)
 ;;; ox-linuxmag-fr-tests.el ends here
