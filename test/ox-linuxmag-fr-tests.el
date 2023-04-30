@@ -189,6 +189,16 @@ See figure [[mypicture2]].")
   (should (ox-linuxmag-fr-tests-contain "<text:p text:style-name=\"pragma\">/// Image : myArticle_myOtherPicture_02.png ///</text:p>"))
   (should (ox-linuxmag-fr-tests-contain "<text:p text:style-name=\"legende\">Fig. 2 : Another legend</text:p>")))
 
+(ert-deftest ox-linuxmag-fr-tests-paragraph-picture-several-caption-lines ()
+  (ox-linuxmag-fr-tests-export "
+#+CAPTION: first line,
+#+CAPTION: second line
+[[file:media/myPicture.png]]
+" :ox-linuxmag-fr-basename "myArticle")
+  (should (ox-linuxmag-fr-tests-contain "<text:p text:style-name=\"pragma\">/// Image : myArticle_myPicture_01.png ///</text:p>"))
+  (should (ox-linuxmag-fr-tests-contain "<text:p text:style-name=\"legende\">Fig. 1 : first line, "))
+  (should (ox-linuxmag-fr-tests-contain "second line</text:p>")))
+
 (ert-deftest ox-linuxmag-fr-tests-paragraph-default ()
   (ox-linuxmag-fr-tests-export "Some discussion.")
   (should (ox-linuxmag-fr-tests-contain "<text:p text:style-name=\"Normal\">Some discussion.</text:p>")))
