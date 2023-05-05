@@ -432,29 +432,11 @@ SRC-BLOCK is the Org parsed element containing this
 line.  BLOCK-TYPE is either \"console\" or \"code\".  INFO is a
 plist holding contextual information."
   (ox-linuxmag-fr--format-textp
-   (let* ((ox-linuxmag-fr--inline-code-style "code_5f_em")
-          (text (org-export-data
-                 (org-element-parse-secondary-string line '(code) src-block)
-                 info)))
-     (concat (ox-linuxmag-fr--src-block-prompt src-block) text))
+   (let* ((ox-linuxmag-fr--inline-code-style "code_5f_em"))
+     (org-export-data
+      (org-element-parse-secondary-string line '(code) src-block)
+      info))
    block-type))
-
-(defun ox-linuxmag-fr--src-block-prompt (src-block)
-  "Return a string corresponding to the prompt for SRC-BLOCK.
-
-The prompt of an SRC-BLOCK is defined with
-
-  #+ATTR_LINUXMAG-FR: :type console :prompt '$ '"
-  (let* ((quoting-char ?')
-         (prompt-attribute (or
-                            (org-export-read-attribute :attr_linuxmag-fr src-block :prompt)
-                            "")))
-    ;; remove quotes if any:
-    (if (and (length> prompt-attribute 2)
-             (eq (aref prompt-attribute 0) quoting-char)
-             (eq (aref prompt-attribute (1- (length prompt-attribute))) quoting-char))
-        (substring-no-properties prompt-attribute 1 -1)
-      prompt-attribute)))
 
 (defun ox-linuxmag-fr--table (table contents info)
   "Transcode a TABLE element from Org to ODT.
