@@ -351,10 +351,10 @@ the plist used as a communication channel."
 
 NOTE-TYPE is a string representing the kind of box."
   (cl-case (intern note-type)
-    ('PAO (concat
-           (ox-linuxmag-fr--format-pragma "Début note PAO")
-           (ox-linuxmag-fr--format-textp contents "pragma")
-           (ox-linuxmag-fr--format-pragma "Fin note PAO")))
+    (PAO (concat
+          (ox-linuxmag-fr--format-pragma "Début note PAO")
+          (ox-linuxmag-fr--format-textp contents "pragma")
+          (ox-linuxmag-fr--format-pragma "Fin note PAO")))
     ((attention avertissement)
      (concat
       (ox-linuxmag-fr--format-pragma (format "Début note : %s" (capitalize note-type)))
