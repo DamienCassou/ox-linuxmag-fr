@@ -134,8 +134,8 @@ possible, le contenu doit être en style « Normal », par exemple :
 Les références, à mettre en style « gras », doivent être intégrées
 dans le discours du texte et leur étiquette sera un nombre (attention
 à bien respecter un ordre croissant 1, 2, 3, etc.). Exemple : Comme on
-peut le voir sur le site de Linux Magazine [[1]] et dans l'article de
-T. Colombo [[2]], blablablabla blablabla. C'est seulement lorsqu'une
+peut le voir sur le [[1][site de Linux Magazine]] et dans [[2][l'article de
+T. Colombo]], blablablabla blablabla. C'est seulement lorsqu'une
 citation apparaît dans le texte quelle peut être développée dans la
 section « Références » en fin d'article. Dans cette section il faudra
 donner des références bibliographiques ou des urls mais il faudra
