@@ -279,7 +279,7 @@ CONTENTS is the text with italic markup.  INFO is a plist holding
 contextual information."
   (ox-linuxmag-fr--format-textspan contents "italic"))
 
-(defun ox-linuxmag-fr--link (link _desc info)
+(defun ox-linuxmag-fr--link (link desc info)
   "Transcode a LINK object from Org to ODT.
 
 DESC is the description part of the link, or the empty string.
@@ -287,7 +287,7 @@ INFO is a plist holding contextual information.  See
 `org-export-data'."
   (let ((raw-link (org-element-property :raw-link link)))
     (cl-case (intern (org-element-property :type link))
-      (fuzzy (ox-linuxmag-fr--format-fuzzy-link link info))
+      (fuzzy (ox-linuxmag-fr--format-fuzzy-link link desc info))
       ;; file links are taken care of by the containing paragraph:
       (file nil)
       (t (ox-linuxmag-fr--format-textspan raw-link "url")))))
@@ -307,18 +307,24 @@ INFO is a plist holding contextual information."
              (ox-linuxmag-fr--is-paragraph-a-figure-p element info))
     (org-export-get-ordinal element info nil #'ox-linuxmag-fr--is-paragraph-a-figure-p)))
 
-(defun ox-linuxmag-fr--format-fuzzy-link (link info)
+(defun ox-linuxmag-fr--format-fuzzy-link (link desc info)
   "Return a string representing LINK.
 
 If LINK targets a figure, the returned string is the one-based
 position of the figure within the document.
+
+DESC is the description part of the link, or the empty string.
 
 INFO is a plist holding contextual information."
   (let* ((target (org-export-resolve-fuzzy-link link info)))
     (if (and (eq (org-element-type target) 'paragraph)
              (ox-linuxmag-fr--is-paragraph-a-figure-p target info))
         (format (number-to-string (ox-linuxmag-fr--figure-number target info)))
-      (ox-linuxmag-fr--format-textspan (format "[%s]" (org-element-property :raw-link link)) "gras"))))
+      (let* ((ref-string (ox-linuxmag-fr--format-textspan
+                          (format "[%s]" (org-element-property :raw-link link)) "gras")))
+        (if (length= desc 0)
+            ref-string
+          (concat desc " " ref-string))))))
 
 (defun ox-linuxmag-fr--paragraph (paragraph contents info)
   "Transcode a PARAGRAPH element from Org to ODT.
@@ -345,10 +351,10 @@ the plist used as a communication channel."
 
 NOTE-TYPE is a string representing the kind of box."
   (cl-case (intern note-type)
-    ('PAO (concat
-           (ox-linuxmag-fr--format-pragma "Début note PAO")
-           (ox-linuxmag-fr--format-textp contents "pragma")
-           (ox-linuxmag-fr--format-pragma "Fin note PAO")))
+    (PAO (concat
+          (ox-linuxmag-fr--format-pragma "Début note PAO")
+          (ox-linuxmag-fr--format-textp contents "pragma")
+          (ox-linuxmag-fr--format-pragma "Fin note PAO")))
     ((attention avertissement)
      (concat
       (ox-linuxmag-fr--format-pragma (format "Début note : %s" (capitalize note-type)))

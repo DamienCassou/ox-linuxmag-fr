@@ -134,8 +134,8 @@ possible, le contenu doit être en style « Normal », par exemple :
 Les références, à mettre en style « gras », doivent être intégrées
 dans le discours du texte et leur étiquette sera un nombre (attention
 à bien respecter un ordre croissant 1, 2, 3, etc.). Exemple : Comme on
-peut le voir sur le site de Linux Magazine [[1]] et dans l'article de
-T. Colombo [[2]], blablablabla blablabla. C'est seulement lorsqu'une
+peut le voir sur le [[1][site de Linux Magazine]] et dans [[2][l'article de
+T. Colombo]], blablablabla blablabla. C'est seulement lorsqu'une
 citation apparaît dans le texte quelle peut être développée dans la
 section « Références » en fin d'article. Dans cette section il faudra
 donner des références bibliographiques ou des urls mais il faudra
@@ -156,7 +156,7 @@ voir en figure [[my-figure]], … ou encore (voir figure [[my-figure]])).
 #+CAPTION: pour certains articles, il peut s'agir de plusieurs paragraphes,
 #+CAPTION: d'où la nécessité d'utiliser le style « pragma ». Le style utilisé
 #+CAPTION: pour une légende… est « legende ».
-[[file:media/nom_article_figure.png]]
+[[file:media/my-figure.png]]
 
 Lorsqu'on décrit une interface graphique ou texte (pas les lignes de
 commandes, les interfaces en mode texte comme Midnight Commander par

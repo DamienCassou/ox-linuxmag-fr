@@ -131,6 +131,12 @@ hashtables.  OX-LINUXMAG-FR-BASENAME is a string."
 <<1>> https://www.wikipedia.org/")
   (should (ox-linuxmag-fr-tests-contain "Foo <text:span text:style-name=\"gras\">[1]</text:span>")))
 
+(ert-deftest ox-linuxmag-fr-tests-link-fuzzy-with-desc ()
+  (ox-linuxmag-fr-tests-export "Voir le [[1][site wikipedia.org]]
+
+<<1>> https://www.wikipedia.org/")
+  (should (ox-linuxmag-fr-tests-contain "Voir le site wikipedia.org <text:span text:style-name=\"gras\">[1]</text:span>")))
+
 (ert-deftest ox-linuxmag-fr-tests-link-fuzzy-figure ()
   (ox-linuxmag-fr-tests-export "
 See figure [[mypicture]].
