@@ -112,6 +112,10 @@ hashtables.  OX-LINUXMAG-FR-BASENAME is a string."
   (ox-linuxmag-fr-tests-export "Test ~foo~")
   (should (ox-linuxmag-fr-tests-contain "Test <text:span text:style-name=\"code_5f_par\">foo</text:span>")))
 
+(ert-deftest ox-linuxmag-fr-tests-verbatim ()
+  (ox-linuxmag-fr-tests-export "Test =foo=")
+  (should (ox-linuxmag-fr-tests-contain "Test <text:span text:style-name=\"code_5f_par\">foo</text:span>")))
+
 (ert-deftest ox-linuxmag-fr-tests-headline-numbered ()
   (ox-linuxmag-fr-tests-export "* Titre 1\n** Titre 1.1")
   (should (ox-linuxmag-fr-tests-contain "<text:h text:style-name=\"Heading_20_1\">1. Titre 1</text:h>"))
