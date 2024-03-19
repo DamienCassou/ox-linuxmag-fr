@@ -58,6 +58,7 @@
   `((template . ox-linuxmag-fr--template)
     (bold . ox-linuxmag-fr--bold)
     (code . ox-linuxmag-fr--code)
+    (verbatim . ox-linuxmag-fr--code)
     (headline . ox-linuxmag-fr--headline)
     (italic . ox-linuxmag-fr--italic)
     (item . ox-linuxmag-fr--format-contents)
