@@ -28,6 +28,7 @@
 
 (require 'ert)
 (require 'ox-linuxmag-fr)
+(require 'ob-shell)
 
 (defconst ox-linuxmag-fr-tests-default-preamble
   "#+title: Titre de l'article
@@ -48,7 +49,8 @@ Make the buffer containing the result current.
 
 OX-LINUXMAG-FR-FIGURE-FILES and OX-LINUXMAG-FR-OTHER-FILES are
 hashtables.  OX-LINUXMAG-FR-BASENAME is a string."
-  (let* ((xml-content (with-temp-buffer
+  (let* ((org-confirm-babel-evaluate nil)
+         (xml-content (with-temp-buffer
                         (unless (string-prefix-p "#+title:" string)
                           (insert ox-linuxmag-fr-tests-default-preamble)
                           (insert "\n"))
@@ -59,7 +61,8 @@ hashtables.  OX-LINUXMAG-FR-BASENAME is a string."
                                              :ox-linuxmag-fr-other-files
                                              ox-linuxmag-fr-other-files
                                              :ox-linuxmag-fr-basename
-                                             ox-linuxmag-fr-basename))))
+                                             ox-linuxmag-fr-basename
+                                             :with-latex 'verbatim))))
          (buffer (get-buffer-create "*ox-linuxmag-fr-test*")))
     (switch-to-buffer buffer)
     (erase-buffer)
@@ -114,6 +117,10 @@ hashtables.  OX-LINUXMAG-FR-BASENAME is a string."
 
 (ert-deftest ox-linuxmag-fr-tests-verbatim ()
   (ox-linuxmag-fr-tests-export "Test =foo=")
+  (should (ox-linuxmag-fr-tests-contain "Test <text:span text:style-name=\"code_5f_par\">foo</text:span>")))
+
+(ert-deftest ox-linuxmag-fr-tests-inline-src-block ()
+  (ox-linuxmag-fr-tests-export "Test src_sh{echo foo}")
   (should (ox-linuxmag-fr-tests-contain "Test <text:span text:style-name=\"code_5f_par\">foo</text:span>")))
 
 (ert-deftest ox-linuxmag-fr-tests-headline-numbered ()
