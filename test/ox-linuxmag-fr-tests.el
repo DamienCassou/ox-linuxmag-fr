@@ -205,6 +205,18 @@ Le texte
   (should (ox-linuxmag-fr-tests-contain "<text:p text:style-name=\"Normal\">Le texte\n</text:p>"))
   (should (ox-linuxmag-fr-tests-contain "<text:p text:style-name=\"pragma\">/// Fin note ///</text:p>")))
 
+(ert-deftest ox-linuxmag-fr-tests-paragraph-note-default-several-paragraphs ()
+  (ox-linuxmag-fr-tests-export "
+#+begin_note
+Le texte
+
+Autre texte
+#+end_note")
+  (should (ox-linuxmag-fr-tests-contain "<text:p text:style-name=\"pragma\">/// Début note ///</text:p>"))
+  (should (ox-linuxmag-fr-tests-contain "<text:p text:style-name=\"Normal\">Le texte\n</text:p>"))
+  (should (ox-linuxmag-fr-tests-contain "<text:p text:style-name=\"Normal\">Autre texte\n</text:p>"))
+  (should (ox-linuxmag-fr-tests-contain "<text:p text:style-name=\"pragma\">/// Fin note ///</text:p>")))
+
 (ert-deftest ox-linuxmag-fr-tests-paragraph-picture ()
   (ox-linuxmag-fr-tests-export "
 #+CAPTION: A legend
