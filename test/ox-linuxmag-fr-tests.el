@@ -170,27 +170,39 @@ See figure [[mypicture2]].")
   (should (ox-linuxmag-fr-tests-contain "Foo <text:span text:style-name=\"url\">https://damien.cassou.me</text:span>")))
 
 (ert-deftest ox-linuxmag-fr-tests-paragraph-note-PAO ()
-  (ox-linuxmag-fr-tests-export "#+ATTR_LINUXMAG-FR: :note PAO\nLe texte")
+  (ox-linuxmag-fr-tests-export "
+#+begin_note_pao
+Le texte
+#+end_note_pao")
   (should (ox-linuxmag-fr-tests-contain "<text:p text:style-name=\"pragma\">/// Début note PAO ///</text:p>"))
-  (should (ox-linuxmag-fr-tests-contain "<text:p text:style-name=\"pragma\">Le texte</text:p>"))
+  (should (ox-linuxmag-fr-tests-contain "<text:p text:style-name=\"pragma\">Le texte\n</text:p>"))
   (should (ox-linuxmag-fr-tests-contain "<text:p text:style-name=\"pragma\">/// Fin note PAO ///</text:p>")))
 
 (ert-deftest ox-linuxmag-fr-tests-paragraph-note-attention ()
-  (ox-linuxmag-fr-tests-export "#+ATTR_LINUXMAG-FR: :note attention\nLe texte")
+  (ox-linuxmag-fr-tests-export "
+#+begin_note_attention
+Le texte
+#+end_note_attention")
   (should (ox-linuxmag-fr-tests-contain "<text:p text:style-name=\"pragma\">/// Début note : Attention ///</text:p>"))
-  (should (ox-linuxmag-fr-tests-contain "<text:p text:style-name=\"Normal\">Le texte</text:p>"))
+  (should (ox-linuxmag-fr-tests-contain "<text:p text:style-name=\"Normal\">Le texte\n</text:p>"))
   (should (ox-linuxmag-fr-tests-contain "<text:p text:style-name=\"pragma\">/// Fin note ///</text:p>")))
 
 (ert-deftest ox-linuxmag-fr-tests-paragraph-note-avertissement ()
-  (ox-linuxmag-fr-tests-export "#+ATTR_LINUXMAG-FR: :note avertissement\nLe texte")
+  (ox-linuxmag-fr-tests-export "
+#+begin_note_avertissement
+Le texte
+#+end_note_avertissement")
   (should (ox-linuxmag-fr-tests-contain "<text:p text:style-name=\"pragma\">/// Début note : Avertissement ///</text:p>"))
-  (should (ox-linuxmag-fr-tests-contain "<text:p text:style-name=\"Normal\">Le texte</text:p>"))
+  (should (ox-linuxmag-fr-tests-contain "<text:p text:style-name=\"Normal\">Le texte\n</text:p>"))
   (should (ox-linuxmag-fr-tests-contain "<text:p text:style-name=\"pragma\">/// Fin note ///</text:p>")))
 
 (ert-deftest ox-linuxmag-fr-tests-paragraph-note-default ()
-  (ox-linuxmag-fr-tests-export "#+ATTR_LINUXMAG-FR: :note t\nLe texte")
+  (ox-linuxmag-fr-tests-export "
+#+begin_note
+Le texte
+#+end_note")
   (should (ox-linuxmag-fr-tests-contain "<text:p text:style-name=\"pragma\">/// Début note ///</text:p>"))
-  (should (ox-linuxmag-fr-tests-contain "<text:p text:style-name=\"Normal\">Le texte</text:p>"))
+  (should (ox-linuxmag-fr-tests-contain "<text:p text:style-name=\"Normal\">Le texte\n</text:p>"))
   (should (ox-linuxmag-fr-tests-contain "<text:p text:style-name=\"pragma\">/// Fin note ///</text:p>")))
 
 (ert-deftest ox-linuxmag-fr-tests-paragraph-picture ()
