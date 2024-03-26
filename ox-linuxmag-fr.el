@@ -331,40 +331,43 @@ INFO is a plist holding contextual information."
   "Transcode a PARAGRAPH element from Org to ODT.
 CONTENTS is the contents of the paragraph, as a string.  INFO is
 the plist used as a communication channel."
-  (let ((note-type (org-export-read-attribute :attr_linuxmag-fr paragraph :note)))
-    (cond
-     (note-type
-      (ox-linuxmag-fr--format-note contents note-type))
-     ((ox-linuxmag-fr--is-paragraph-a-figure-p paragraph info)
-      (ox-linuxmag-fr--format-figure paragraph contents info))
-     (t
-      (let* ((parent (org-export-get-parent paragraph))
-             (parent-type (org-element-type parent))
-             (prefix (when (eq parent-type 'item) "- ")))
-        (org-odt--format-paragraph
-         paragraph
-         (concat prefix contents)
-         info
-         "Normal" "" ""))))))
+  (cond
+   ((ox-linuxmag-fr--is-paragraph-a-figure-p paragraph info)
+    (ox-linuxmag-fr--format-figure paragraph contents info))
+   (t
+    (let* ((parent (org-export-get-parent paragraph))
+           (parent-type (org-element-type parent))
+           (prefix (when (eq parent-type 'item) "- "))
+           (style (if (and
+                       (eq parent-type 'special-block)
+                       (equal (org-element-property :type parent) "note_pao"))
+                      "pragma"
+                    "Normal")))
+      (org-odt--format-paragraph
+       paragraph
+       (concat prefix contents)
+       info
+       style
+       "" "")))))
 
 (defun ox-linuxmag-fr--format-note (contents note-type)
   "Return a string containing CONTENTS with a box markup.
 
-NOTE-TYPE is a string representing the kind of box."
-  (cl-case (intern note-type)
+NOTE-TYPE is a symbol representing the kind of box."
+  (cl-case note-type
     (PAO (concat
           (ox-linuxmag-fr--format-pragma "Début note PAO")
-          (ox-linuxmag-fr--format-textp contents "pragma")
+          contents
           (ox-linuxmag-fr--format-pragma "Fin note PAO")))
     ((attention avertissement)
      (concat
-      (ox-linuxmag-fr--format-pragma (format "Début note : %s" (capitalize note-type)))
-      (ox-linuxmag-fr--format-textp contents)
+      (ox-linuxmag-fr--format-pragma (format "Début note : %s" (capitalize (symbol-name note-type))))
+      contents
       (ox-linuxmag-fr--format-pragma "Fin note")))
     (t
      (concat
       (ox-linuxmag-fr--format-pragma (format "Début note"))
-      (ox-linuxmag-fr--format-textp contents)
+      contents
       (ox-linuxmag-fr--format-pragma "Fin note")))))
 
 (defun ox-linuxmag-fr--format-figure (paragraph _contents info)
@@ -397,6 +400,10 @@ contextual information."
   (let ((type (intern (org-element-property :type special-block))))
     (cl-case type
       (encadre (ox-linuxmag-fr--format-encadre special-block contents))
+      (note (ox-linuxmag-fr--format-note contents 'default))
+      (note_pao (ox-linuxmag-fr--format-note contents 'PAO))
+      (note_avertissement (ox-linuxmag-fr--format-note contents 'avertissement))
+      (note_attention (ox-linuxmag-fr--format-note contents 'attention))
       (t contents))))
 
 (defun ox-linuxmag-fr--format-encadre (special-block contents)

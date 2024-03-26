@@ -61,16 +61,18 @@ ci-dessus. Essayez de commenter votre code et vos commandes shell de
 manière à ne pas avoir d'immenses blocs de code ou de sorties shell
 qui rendent l'article illisible.
 
-#+ATTR_LINUXMAG-FR: :note PAO
+#+begin_note_pao
 Le texte ici est destiné à indiquer des informations supplémentaires à
 la rédaction. Il n'apparaîtra pas dans l'article final.
+#+end_note_pao
 
 Pour une note apparaissant dans l'article final il faut seulement
 supprimer le terme PAO :
 
-#+ATTR_LINUXMAG-FR: :note t
+#+begin_note
 Le texte présent ici, rédigé en style « Normal », apparaîtra dans
 l'article final dans une boîte spéciale « note ».
+#+end_note
 
 Les indications en style « pragma », comme ci-dessus, doivent toujours
 être encadrées de 3 slashs ​/​/​/​…/​/​/.
@@ -78,13 +80,15 @@ Les indications en style « pragma », comme ci-dessus, doivent toujours
 Si vous souhaitez une note ayant pour titre : Avertissement ou
 Attention (avec la petite icône associée), il faut utiliser :
 
-#+ATTR_LINUXMAG-FR: :note attention
+#+begin_note_attention
 Le texte présent ici, rédigé en style « Normal », apparaîtra dans
 l'article final dans une boîte spéciale « Attention ».
+#+end_note_attention
 
-#+ATTR_LINUXMAG-FR: :note avertissement
+#+begin_note_avertissement
 Le texte présent ici, rédigé en style « Normal », apparaîtra dans
 l'article final dans une boîte spéciale « Avertissement ».
+#+end_note_avertissement
 
 Les sessions de commandes interactives sont à utiliser avec le style
 de paragraphe « console ». On peut également mettre en évidence
