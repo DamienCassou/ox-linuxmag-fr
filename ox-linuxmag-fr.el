@@ -71,8 +71,8 @@
     (table-cell . ox-linuxmag-fr--table-cell)
     (target . ox-linuxmag-fr--target)
     (underline . ox-linuxmag-fr--underline))
-  :menu-entry '(?g "Export to ODT for GNU/Linux Magazine"
-                   ((?g "As ODT file" ox-linuxmag-fr-export-to-odt)))
+  :menu-entry '(?G "Export to ODT for GNU/Linux Magazine"
+                   ((?G "As ODT file" ox-linuxmag-fr-export-to-odt)))
   :options-alist
   `((:author-description "AUTHOR_DESCRIPTION" nil nil newline)
     (:logos "LOGOS" nil nil newline))
