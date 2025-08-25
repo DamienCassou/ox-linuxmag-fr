@@ -337,7 +337,8 @@ the plist used as a communication channel."
    (t
     (let* ((parent (org-export-get-parent paragraph))
            (parent-type (org-element-type parent))
-           (prefix (when (eq parent-type 'item) "- "))
+           (prefix (when (eq parent-type 'item)
+                     (ox-linuxmag-fr--make-item-bullet (org-export-get-parent paragraph))))
            (style (if (and
                        (eq parent-type 'special-block)
                        (equal (org-element-property :type parent) "note_pao"))
@@ -349,6 +350,24 @@ the plist used as a communication channel."
        info
        style
        "" "")))))
+
+(defun ox-linuxmag-fr--make-item-bullet (item)
+  "Return the bullet appropriate for list-item ITEM."
+  (let* ((plain-list (org-export-get-parent item))
+	 (list-type (org-element-property :type plain-list)))
+    (pcase list-type
+      (`ordered
+       (let* ((struct (org-element-property :structure item))
+	      (bul (org-list-bullet-string (org-element-property :bullet item)))
+	      (num (number-to-string
+		    (car (last (org-list-get-item-number
+				(org-element-property :begin item)
+				struct
+				(org-list-prevs-alist struct)
+				(org-list-parents-alist struct)))))))
+	 (replace-regexp-in-string "[0-9A-Za-z]+" num bul)))
+      (`unordered (org-list-bullet-string (org-element-property :bullet item)))
+      (_ (user-error "Plain-list type '%s' isn't accepted" list-type)))))
 
 (defun ox-linuxmag-fr--format-note (contents note-type)
   "Return a string containing CONTENTS with a box markup.

@@ -249,6 +249,11 @@ Autre texte
   (should (ox-linuxmag-fr-tests-contain "<text:p text:style-name=\"Normal\">- item 1\n</text:p>"))
   (should (ox-linuxmag-fr-tests-contain "<text:p text:style-name=\"Normal\">- item 2\n</text:p>")))
 
+(ert-deftest ox-linuxmag-fr-tests-ordered-list ()
+  (ox-linuxmag-fr-tests-export "1. item 1\n1. item 2\n")
+  (should (ox-linuxmag-fr-tests-contain "<text:p text:style-name=\"Normal\">1. item 1\n</text:p>"))
+  (should (ox-linuxmag-fr-tests-contain "<text:p text:style-name=\"Normal\">2. item 2\n</text:p>")))
+
 (ert-deftest ox-linuxmag-fr-tests-special-block-encadre ()
   (ox-linuxmag-fr-tests-export "
 #+ATTR_LINUXMAG-FR: :titre Titre
