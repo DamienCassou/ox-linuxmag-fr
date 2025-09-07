@@ -136,6 +136,10 @@ hashtables.  OX-LINUXMAG-FR-BASENAME is a string."
   (ox-linuxmag-fr-tests-export "Test /foo/")
   (should (ox-linuxmag-fr-tests-contain "Test <text:span text:style-name=\"italic\">foo</text:span>")))
 
+(ert-deftest ox-linuxmag-fr-tests-dash-dash ()
+  (ox-linuxmag-fr-tests-export "Test with two consecutive dashes: --foo")
+  (should (ox-linuxmag-fr-tests-contain "--foo")))
+
 (ert-deftest ox-linuxmag-fr-tests-link-fuzzy ()
   (ox-linuxmag-fr-tests-export "Foo [[1]]
 

@@ -64,6 +64,7 @@
     (item . ox-linuxmag-fr--format-contents)
     (link . ox-linuxmag-fr--link)
     (paragraph . ox-linuxmag-fr--paragraph)
+    (plain-text . ox-linuxmag-fr--plain-text)
     (plain-list . ox-linuxmag-fr--format-contents)
     (special-block . ox-linuxmag-fr--special-block)
     (src-block . ox-linuxmag-fr--src-block)
@@ -470,6 +471,14 @@ plist holding contextual information."
       (org-element-parse-secondary-string line '(code) src-block)
       info))
    block-type))
+
+(defun ox-linuxmag-fr--plain-text (text info)
+  "Transcode a TEXT string from Org to ODT.
+TEXT is the string to transcode.  INFO is a plist holding
+contextual information."
+  ;; deactivate automatic character transformations:
+  (let ((org-odt-special-string-regexps '()))
+    (org-odt-plain-text text info)))
 
 (defun ox-linuxmag-fr--table (table contents info)
   "Transcode a TABLE element from Org to ODT.
