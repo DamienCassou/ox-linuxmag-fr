@@ -476,8 +476,8 @@ plist holding contextual information."
 CONTENTS holds the contents of the item.  INFO is a plist holding
 contextual information."
   (concat
-   (format "<table:table table:style-name=\"Tableau\">")
-   (format "<table:table-column table:style-name=\"Tableau.A\" table:number-columns-repeated=\"%s\"/>"
+   (format "<table:table table:style-name=\"Tableau1\">")
+   (format "<table:table-column table:style-name=\"Tableau1.A\" table:number-columns-repeated=\"%s\"/>"
            (length (org-odt-table-first-row-data-cells table info)))
    contents
    (format "</table:table>")))
@@ -487,7 +487,7 @@ contextual information."
 CONTENTS is nil.  INFO is a plist used as a communication
 channel."
   (concat
-   (format "<table:table-cell table:style-name=\"Tableau.A1\" office:value-type=\"string\">")
+   (format "<table:table-cell table:style-name=\"Tableau1.A1\" office:value-type=\"string\">")
    (when contents (ox-linuxmag-fr--format-textp contents))
    (format "</table:table-cell>")))
 
